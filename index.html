@@ -177,6 +177,14 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .cpnote{font-size:14px;font-weight:600;opacity:.7;margin-top:14px;text-align:center}
 .cpnote.light{opacity:1;color:var(--muted);background:#f6f3e8;border-radius:10px;padding:8px 12px;margin:0 0 12px}
 
+/* 라인업 고르기 */
+.lupanel{border:2px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fbfaf4}
+.lugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+.lubox{position:relative;border:2px solid var(--line);background:#fff;border-radius:10px;padding:8px 6px;font-weight:700;font-size:15px;font-family:var(--fb);display:flex;align-items:center;justify-content:center;gap:6px}
+.lubox.on{border-color:var(--ink);background:#fff3c4}
+.lubox b{background:var(--ink);color:var(--gold);border-radius:99px;min-width:24px;height:24px;display:inline-grid;place-items:center;font-size:13px}
+.lubox span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
 /* 승인 · 감사 */
 .apbox{background:#eef8f1;border:2px solid #bfe3cb;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:10px}
 .thanks{display:inline-block;margin-top:6px;background:#ffe4ea;color:#c2185b;font-weight:800;font-size:14px;padding:3px 10px;border-radius:99px}
@@ -818,7 +826,7 @@ function buildModal(){
         <div id="mRules" class="rules" hidden></div>
         <div class="muted" style="font-size:13px">추천 틀을 누르면 가사에 들어가요</div>
         <div class="chips">${chipsHTML(n)}</div>
-        ${n === 'lineup' ? `<div class="row" style="margin:4px 0 8px">${getOrders().map((o, i) => `<button type="button" class="btn ghost sm" data-lineup="${i}">🧢 ${esc(o.name)} 라인업 불러오기</button>`).join('')}<span class="muted" style="font-size:14px">⚙️ 설정의 타순대로 이름을 넣어요</span></div>` : ''}
+        ${n === 'lineup' ? `<div class="row" style="margin:4px 0 8px"><button type="button" class="btn ghost sm" id="mLuBtn">🧢 라인업 불러오기</button><span class="muted" style="font-size:14px">넣을 학생을 골라서 순서대로 넣어요</span></div><div id="mLuPanel" class="lupanel" hidden></div>` : ''}
         <textarea id="mLyr" class="inp" style="min-height:160px;font-family:var(--fb);font-weight:600;font-size:19px" placeholder="노래에 맞춰 응원 가사를 적어 보세요"></textarea>
         <div class="row" style="justify-content:space-between;margin-top:8px">
           <span class="cnt" id="mCnt"></span>
@@ -845,11 +853,7 @@ function buildModal(){
     const ta = $('#mLyr');
     ta.oninput = () => { M.dirtyLyr = true; $('#mLyrSaved').textContent = ''; updateCount(); renderRules(); };
     $('#mLyrBtn').onclick = saveLyrics;
-    $('#mBody').querySelectorAll('[data-lineup]').forEach(b => b.onclick = () => {
-      const o = getOrders()[+b.dataset.lineup]; if (!o) return;
-      const lines = o.list.map((v, i) => `${i + 1}번 타자 ${playerName(v) || v + '번'}!`);
-      insertAt(ta, (getOrders().length > 1 ? `[${o.name}]\n` : '') + lines.join('\n'));
-    });
+    if ($('#mLuBtn')) $('#mLuBtn').onclick = () => { const p = $('#mLuPanel'); p.hidden = !p.hidden; if (!p.hidden) luRender(); };
     $('#mBody').querySelectorAll('.sec:nth-child(2) .tchip').forEach(b => b.onclick = () => insertAt(ta, fill(b.dataset.t, n)));
   }
   if (canRec){
@@ -868,6 +872,34 @@ function buildModal(){
     M.dirtyInfo = M.dirtyLyr = false; toast('지웠어요');
   };
   updateModal();
+}
+
+/* 라인업 고르기 */
+let LU = [], LUF = 'a';
+function luRender(){
+  const p = $('#mLuPanel'); if (!p) return;
+  const m = S.room.meta, os = getOrders();
+  let boxes = '';
+  for (let i = 1; i <= m.count; i++){
+    const k = LU.indexOf(i), nm = playerName(i);
+    boxes += `<button type="button" class="lubox ${k >= 0 ? 'on' : ''}" data-lu="${i}">${k >= 0 ? `<b>${k + 1}</b>` : ''}<span>${i}번${nm ? ' ' + esc(nm) : ''}</span></button>`;
+  }
+  p.innerHTML = `<div class="row" style="gap:6px;margin-bottom:8px"><span class="muted" style="font-size:14px">빠른 선택</span>${os.map((o, i) => `<button type="button" class="btn ghost sm" data-lupre="${i}">${esc(o.name)} 타순</button>`).join('')}<button type="button" class="btn ghost sm" id="luClear">모두 해제</button></div>
+    <div class="muted" style="font-size:14px;margin-bottom:6px">누르는 순서대로 타순 번호가 붙어요. 다시 누르면 빠져요.</div>
+    <div class="lugrid">${boxes}</div>
+    <div class="row" style="margin-top:10px;justify-content:space-between">
+      <span class="row"><span class="muted" style="font-size:14px">넣는 모양</span><select id="luFmt" class="inp" style="width:auto;padding:6px 10px">
+        <option value="a">1번 타자 민수!</option><option value="b">민수!</option><option value="c">7번 민수!</option></select></span>
+      <span class="row"><span class="muted" style="font-size:14px">${LU.length}명 골랐어요</span><button type="button" class="btn gold sm" id="luIns" ${LU.length ? '' : 'disabled'}>가사에 넣기</button></span>
+    </div>`;
+  $('#luFmt').value = LUF; $('#luFmt').onchange = e => LUF = e.target.value;
+  p.querySelectorAll('[data-lu]').forEach(b => b.onclick = () => { const v = +b.dataset.lu, k = LU.indexOf(v); if (k >= 0) LU.splice(k, 1); else LU.push(v); luRender(); });
+  p.querySelectorAll('[data-lupre]').forEach(b => b.onclick = () => { const o = getOrders()[+b.dataset.lupre]; if (o){ LU = o.list.slice(); luRender(); } });
+  $('#luClear').onclick = () => { LU = []; luRender(); };
+  $('#luIns').onclick = () => {
+    const lines = LU.map((v, i) => { const nm = playerName(v) || v + '번'; return LUF === 'b' ? `${nm}!` : LUF === 'c' ? `${v}번 ${playerName(v) || ''}`.trim() + '!' : `${i + 1}번 타자 ${nm}!`; });
+    insertAt($('#mLyr'), lines.join('\n')); p.hidden = true; toast(`${LU.length}명을 가사에 넣었어요. "가사 저장"을 눌러 주세요!`);
+  };
 }
 
 function updateCount(){ const ta = $('#mLyr'); if (ta) $('#mCnt').textContent = ta.value.length + ' / 600자'; }

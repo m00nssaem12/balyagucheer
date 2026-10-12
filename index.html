@@ -157,7 +157,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .biglyr{white-space:pre-wrap;font-family:var(--fb);font-size:clamp(28px,5vw,56px);line-height:1.5;text-align:center;max-width:1000px}
 .bigclose{position:fixed;top:14px;right:14px;z-index:5}
 
-/* 시합 모드 · 한 줄 가사 */
+/* 연습 모드 · 한 줄 가사 */
 .stagebar{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 14px;z-index:5;background:linear-gradient(#0e2416,rgba(14,36,22,0))}
 .bigin{padding-top:70px!important}
 .bigorder{font-family:var(--fb);font-weight:700;font-size:18px;opacity:.8;min-height:22px}
@@ -173,6 +173,9 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .ordsel{display:inline-flex;gap:6px;align-items:center;margin-left:8px;color:#fff;font-weight:700;font-size:14px;flex-wrap:wrap}
 .ordrow{display:grid;grid-template-columns:150px 1fr;gap:8px;margin-bottom:6px}
 @media (max-width:560px){.ordrow{grid-template-columns:1fr}}
+
+.cpnote{font-size:14px;font-weight:600;opacity:.7;margin-top:14px;text-align:center}
+.cpnote.light{opacity:1;color:var(--muted);background:#f6f3e8;border-radius:10px;padding:8px 12px;margin:0 0 12px}
 
 /* 승인 · 감사 */
 .apbox{background:#eef8f1;border:2px solid #bfe3cb;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:10px}
@@ -398,6 +401,7 @@ label.f small{font-size:14px}
     <div class="biglyr" id="bigLyr"></div>
     <div class="row stagectl" id="bigLyrCtl"></div>
     <div class="stagehelp" id="bigHelp"></div>
+    <div class="cpnote">🎵 교실 수업용이에요 · 원곡 저작권이 있어 공개 행사 재생이나 학교 밖 공유는 하지 않아요</div>
   </div>
 </div>
 
@@ -451,7 +455,7 @@ label.f small{font-size:14px}
       <input id="ePin2" class="inp" type="password" maxlength="20" placeholder="새 비밀번호 확인" autocomplete="new-password">
     </div>
     <label class="f">상대 팀 이름 <small>쉼표로 구분 · 가사와 추천에 쓸 수 없어요</small></label><input id="eRivals" class="inp" placeholder="예: 2반, 독수리">
-    <label class="f">⚾ 시합 모드 타순 <small>번호를 쉼표로 · 여자/남자 경기를 따로 하면 아래 칸도 채워요</small></label>
+    <label class="f">🎤 연습 모드 타순 <small>번호를 쉼표로 · 여자/남자 경기를 따로 하면 아래 칸도 채워요</small></label>
     <div class="ordrow"><input id="eOrdN0" class="inp" maxlength="10" placeholder="전체 경기"><input id="eOrd0" class="inp" placeholder="비우면 1번부터 차례로 (예: 3, 7, 1 …)"></div>
     <div class="ordrow"><input id="eOrdN1" class="inp" maxlength="10" placeholder="예: 여자 경기"><input id="eOrd1" class="inp" placeholder="이 경기에 나오는 번호만 순서대로 (예: 2, 4, 6 …)"></div>
     <div class="ordrow"><input id="eOrdN2" class="inp" maxlength="10" placeholder="예: 남자 경기"><input id="eOrd2" class="inp" placeholder="이 경기에 나오는 번호만 순서대로 (예: 1, 3, 5 …)"></div>
@@ -475,6 +479,7 @@ label.f small{font-size:14px}
       <div class="title" id="allTitle">응원가 모아 보기</div>
       <div class="row noprint"><button class="btn ghost sm" id="allListBtn" onclick="openAll('list')">📃 목록</button><button class="btn ghost sm" id="allCardBtn" onclick="openAll('card')">🃏 카드</button><button class="btn sm" onclick="window.print()">🖨 인쇄</button><button class="x" onclick="$('#allView').hidden=true">✕</button></div>
     </div>
+    <div class="cpnote light">🎵 교실 수업용 · 원곡 저작권이 있어 학교 밖(SNS·영상 등)으로 공유하지 않아요</div>
     <div id="allList"></div>
   </div>
 </div>
@@ -732,7 +737,7 @@ function renderBoard(){
     ? `<b>선생님</b> · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`
     : `<b>${S.me}번</b> 으로 들어왔어요 · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`;
   $('#bBtns').innerHTML = (S.role === 'teacher'
-    ? `<button class="btn gold sm" onclick="openGame()">⚾ 시합 모드</button><button class="btn chalk sm" onclick="openShare()">📱 참여 안내</button><button class="btn chalk sm" onclick="openSettings()">⚙️ 설정</button>` : '')
+    ? `<button class="btn gold sm" onclick="openGame()">🎤 연습 모드</button><button class="btn chalk sm" onclick="openShare()">📱 참여 안내</button><button class="btn chalk sm" onclick="openSettings()">⚙️ 설정</button>` : '')
     + (S.role === 'teacher' ? `<button class="btn chalk sm" onclick="teacherLogout()">🔓 로그아웃</button>` : '')
     + `<button class="btn chalk sm" onclick="openAll()">📜 모아 보기</button><button class="btn chalk sm" onclick="goHome()">나가기</button>`;
   $('#bHint').textContent = S.role === 'teacher'
@@ -791,7 +796,7 @@ function buildModal(){
   const canRec = S.role === 'student' && !owner && !m.locked;
   $('#mBody').innerHTML = `
     <div class="sec">
-      <h3>🎵 노래</h3>
+      <h3>🎵 노래 <small>교실 수업용 · 외부 공유 금지</small></h3>
       <div class="frame" id="mFrame"></div>
       ${ce ? `
         <div class="grid2" style="margin-top:10px">
@@ -967,7 +972,7 @@ async function sendRec(){
   catch(e){ toast('추천하지 못했어요', true); }
 }
 
-/* ---------------- 응원 모드 · 시합 모드 · 한 줄 가사 ---------------- */
+/* ---------------- 응원 모드 · 연습 모드 · 한 줄 가사 ---------------- */
 let G = { mode: 'single', key: null, idx: 0, lines: [], li: 0, kara: true };
 function getOrders(raw){
   const m = S.room.meta, ok = v => v >= 1 && v <= m.count;

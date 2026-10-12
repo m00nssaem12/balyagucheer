@@ -85,6 +85,19 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .tile .me{position:absolute;top:8px;left:8px;background:var(--gold);font-weight:900;font-size:12px;padding:2px 8px;border-radius:99px}
 .tile .rc{position:absolute;top:8px;right:8px;font-size:12px;font-weight:700;background:#e8f0ff;color:var(--blue);padding:2px 8px;border-radius:99px}
 
+/* 팀 응원가 · 라인업송 */
+.sprow{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}
+.sptile{position:relative;border:0;border-radius:18px;background:var(--ink);color:#fff;padding:16px 18px;display:flex;align-items:center;gap:14px;text-align:left;box-shadow:0 6px 0 rgba(0,0,0,.25)}
+.sptile:hover{transform:translateY(-2px)}
+.sptile .spi{font-size:38px;flex:none}
+.sptile .spt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.sptile .spt b{font-family:var(--ft);font-weight:400;font-size:26px;color:var(--gold)}
+.sptile .spt small{font-size:15px;opacity:.85;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sptile .st{font-size:14px;font-weight:700;padding:3px 12px;border-radius:99px;background:rgba(255,255,255,.15);flex:none}
+.sptile.part .st{background:#ffe7c2;color:#a35a00}
+.sptile.done .st{background:#2a9d55}
+.sptile .rc{position:absolute;top:8px;right:10px;font-size:13px;font-weight:700;background:#e8f0ff;color:var(--blue);padding:2px 8px;border-radius:99px}
+
 /* overlay / modal */
 .ov{position:fixed;inset:0;background:rgba(10,25,15,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto}
 .ov[hidden]{display:none}
@@ -138,8 +151,43 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 #toast.bad{background:var(--red)}
 
 /* 전광판 글씨 */
-h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.tile .me,.chip,.tchip,.who b,#toast{font-family:var(--ft);font-weight:400;letter-spacing:.3px}
+h1,h2,.title,.tile .num,.mnum,.codebig,.bigname,.biglyr{font-family:var(--ft);font-weight:400;letter-spacing:.3px}
+.btn,.sec h3,.tile .st,.tile .me,.chip,.tchip,.who b,#toast,.rec .rmeta button{font-family:var(--fb);letter-spacing:-.2px}
+.btn{font-weight:700}
+.sec h3{font-weight:800;font-size:19px}
+.chip,.tchip{font-weight:600}
+#toast{font-weight:600}
+
+/* 잘 보이게: 글씨 키우고 대비 높이기 */
+:root{--muted:#4a5a50}
+body{font-size:17px}
+.sec h3{font-size:21px;color:var(--ink)}
+.sec h3 small{font-size:15px;color:var(--muted)}
+.tchip{font-size:16px;font-weight:700;padding:8px 14px;color:#3a2a00;background:#ffe9a3;border-color:#e0b93a}
+.chip{font-size:16px;color:#3a2a00}
 .btn{font-size:17px}
+.btn.sm{font-size:16px;padding:9px 14px}
+.inp{font-size:17px;border-color:#cfc8b4;color:var(--ink)}
+.inp::placeholder{color:#7d8a82}
+textarea#mLyr{font-size:21px!important;line-height:1.7}
+label.f{font-size:16px}
+label.f small{font-size:14px}
+.cnt{font-size:15px}
+.saved{font-size:15px}
+.muted{font-size:inherit}
+#mBody .muted{font-size:15px!important;font-weight:600}
+.lyrview{font-size:24px}
+.rec .rtext{font-size:20px}
+.rec .rsong{font-weight:700;font-size:16px;margin-bottom:4px}
+.rec .rsong a{color:var(--blue)}
+.rec .rmeta{font-size:15px}
+.rec .rmeta button{font-size:15px;padding:6px 12px}
+.tile .nm{font-size:16px}
+.tile .sg{font-size:13px;color:var(--muted)}
+.tile .st{font-size:14px;padding:3px 12px}
+.tile .me,.tile .rc{font-size:13px}
+.hint{font-size:17px}
+.songinfo{font-size:20px}
 .who,.hint,.hero p,.songinfo,.bigsong{font-weight:600}
 .lyrview,.rec .rtext,.allitem .l{font-weight:600}
 .tile .nm{font-weight:700}
@@ -224,6 +272,10 @@ h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.
         <div><label class="f">반 부르는 이름 <small>'O반' 자리에 들어가요</small></label><input id="sShort" class="inp" placeholder="예: 3반"></div>
       </div>
       <div class="grid2">
+        <div><label class="f">팀 이름 <small>'OO' 자리에 들어가요</small></label><input id="sTeam" class="inp" maxlength="15" placeholder="예: 번개, 3반 호랑이"></div>
+        <div></div>
+      </div>
+      <div class="grid2">
         <div><label class="f">반 인원</label><input id="sCount" class="inp" type="number" min="1" max="40" value="24"></div>
         <div><label class="f">선생님 비밀번호 <small>4~20자 · 글자·숫자·기호 모두 가능</small></label><input id="sPin" class="inp" type="password" maxlength="20" autocomplete="new-password"></div>
       </div>
@@ -233,7 +285,7 @@ h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.
       </div>
       <label class="f">학생 이름 <small>선택 · 한 줄에 한 명, 1번부터 (비우면 학생이 직접 입력)</small></label>
       <textarea id="sNames" class="inp" placeholder="김민수&#10;이서연&#10;..."></textarea>
-      <label class="f">추천 틀 <small>OO → 선수 이름, O반 → 반 이름으로 바뀌어요</small></label>
+      <label class="f">추천 틀 <small>OO → 팀 이름, O반 → 반 이름으로 바뀌어요</small></label>
       <div id="sTpl"></div>
       <label class="f">추가 금지어 <small>쉼표로 구분 (기본 욕설·유행어는 이미 막혀 있어요)</small></label>
       <input id="sBan" class="inp" placeholder="예: 상대팀 이름, 별명 등">
@@ -257,6 +309,7 @@ h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.
     <div class="hint" id="bHint"></div>
     <div class="who" style="color:#fff" id="bProgText"></div>
     <div class="prog"><i id="bProg"></i></div>
+    <div class="sprow" id="sprow"></div>
     <div class="grid" id="grid"></div>
   </section>
 
@@ -309,6 +362,10 @@ h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.
     <div class="grid2">
       <div><label class="f">방 이름</label><input id="eClass" class="inp"></div>
       <div><label class="f">반 부르는 이름</label><input id="eShort" class="inp"></div>
+    </div>
+    <div class="grid2">
+      <div><label class="f">팀 이름 <small>'OO' 자리</small></label><input id="eTeam" class="inp" maxlength="15"></div>
+      <div></div>
     </div>
     <label class="f">반 인원</label><input id="eCount" class="inp" type="number" min="1" max="40">
     <label class="f">학생 이름 <small>한 줄에 한 명, 1번부터</small></label>
@@ -427,17 +484,20 @@ function ytStart(u){
   const h = +(v.match(/(\d+)h/) || [0,0])[1], mi = +(v.match(/(\d+)m/) || [0,0])[1], s = +(v.match(/(\d+)s/) || [0,0])[1];
   return h * 3600 + mi * 60 + s;
 }
-const ytEmbed = (id, st) => `<iframe src="https://www.youtube-nocookie.com/embed/${id}?start=${st || 0}&rel=0&playsinline=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+const ytEmbed = (id, st, auto) => `<iframe src="https://www.youtube-nocookie.com/embed/${id}?start=${st || 0}&rel=0&playsinline=1${auto ? '&autoplay=1' : ''}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
 
 /* ---------------- 상태 ---------------- */
 const S = { code: null, role: null, me: null, room: null, unwatch: null, openN: null };
 const DEFAULT_TPL = ['최강OO','무적OO','O반','안타','홈런','날려라 OO','달려라 OO','가자 가자 O반','승리의 O반','파이팅'];
-const song = n => ((S.room && S.room.songs) || {})['n' + n] || {};
-const recsOf = n => ((S.room && S.room.recs) || {})['n' + n] || {};
-function playerName(n){ const s = song(n); return (s.name || ((S.room.meta.names || [])[n - 1]) || '').trim(); }
+const SPECIAL = { team: { label: '우리 반 팀 응원가', icon: '🏟', desc: '우리 반 모두 함께 부르는 응원가' }, lineup: { label: '라인업송', icon: '📢', desc: '선수 입장·타순 소개 때 부르는 노래' } };
+const isSp = n => typeof n === 'string';
+const keyOf = n => isSp(n) ? n : 'n' + n;
+const song = n => ((S.room && S.room.songs) || {})[keyOf(n)] || {};
+const recsOf = n => ((S.room && S.room.recs) || {})[keyOf(n)] || {};
+function playerName(n){ if (isSp(n)) return ''; const s = song(n); return (s.name || ((S.room.meta.names || [])[n - 1]) || '').trim(); }
 function fill(t, n){
-  const nm = playerName(n), sh = (S.room.meta.short || '').trim();
-  let r = t; if (nm) r = r.replace(/OO|○○|ㅇㅇ/g, nm); if (sh) r = r.replace(/O반|○반/g, sh); return r;
+  const tm = (S.room.meta.team || '').trim(), sh = (S.room.meta.short || '').trim();
+  let r = t; if (tm) r = r.replace(/OO|○○|ㅇㅇ/g, tm); if (sh) r = r.replace(/O반|○반/g, sh); return r;
 }
 function hash(s){ let x = 5381; for (const c of s) x = ((x << 5) + x + c.charCodeAt(0)) | 0; return (x >>> 0).toString(36); }
 
@@ -479,6 +539,7 @@ async function createRoom(){
   if (!(count >= 1 && count <= 40)) return toast('반 인원은 1~40명으로 넣어 주세요', true);
   const school = $('#sSchool').value.trim();
   if (!school) return toast('학교 이름을 넣어 주세요', true);
+  { const b = checkText($('#sTeam').value); if (b) return toast(badMsg(b), true); }
   if (pin.length < 4 || pin.length > 20) return toast('선생님 비밀번호는 4~20자로 넣어 주세요', true);
   if (pin !== $('#sPin2').value.trim()) return toast('비밀번호 확인이 달라요', true);
   const names = $('#sNames').value.split('\n').map(s => s.trim()).slice(0, count);
@@ -490,7 +551,7 @@ async function createRoom(){
   }
   const meta = {
     school: school.slice(0, 30),
-    className: $('#sClass').value.trim() || '우리 반 발야구 응원가', short: $('#sShort').value.trim(), count, names,
+    className: $('#sClass').value.trim() || '우리 반 발야구 응원가', short: $('#sShort').value.trim(), team: $('#sTeam').value.trim().slice(0, 15), count, names,
     templates: setupTpl.get(), banned: $('#sBan').value.split(',').map(s => s.trim()).filter(Boolean),
     pin: hash(pin), locked: false, createdAt: Date.now()
   };
@@ -543,8 +604,8 @@ function renderBoard(){
     ? `<button class="btn chalk sm" onclick="openShare()">📱 참여 안내</button><button class="btn chalk sm" onclick="openSettings()">⚙️ 설정</button>` : '')
     + `<button class="btn chalk sm" onclick="openAll()">📜 모아 보기</button><button class="btn chalk sm" onclick="goHome()">나가기</button>`;
   $('#bHint').textContent = S.role === 'teacher'
-    ? '번호를 누르면 학생의 응원가를 보고 고칠 수 있어요. 문제가 있는 추천은 지울 수 있어요.'
-    : (m.locked ? '선생님이 잠가 두었어요. 응원가를 볼 수만 있어요.' : '노란 칸(내 번호)을 눌러 응원가를 만들고, 친구 번호를 눌러 가사를 추천해 보세요!');
+    ? '팀 응원가·라인업송은 학생들의 추천을 받아 선생님이 완성해요. 번호를 누르면 학생 응원가를 보고 고칠 수 있어요.'
+    : (m.locked ? '선생님이 잠가 두었어요. 응원가를 볼 수만 있어요.' : '노란 칸(내 번호)을 눌러 응원가를 만들고, 친구 번호나 팀 응원가·라인업송을 눌러 가사를 추천해 보세요!');
   let html = '', done = 0;
   for (let n = 1; n <= m.count; n++){
     const s = song(n), rc = Object.keys(recsOf(n)).length;
@@ -556,6 +617,15 @@ function renderBoard(){
       <span class="sg">${s.title ? '♪ ' + esc(s.title) : ''}</span>
       <span class="st">${isDone ? '완성' : part ? '만드는 중' : '아직'}</span></button>`;
   }
+  $('#sprow').innerHTML = Object.keys(SPECIAL).map(k => {
+    const sp = SPECIAL[k], s = song(k), rc = Object.keys(recsOf(k)).length;
+    const isDone = ytId(s.url) && (s.lyrics || '').trim(), part = !isDone && (s.url || s.lyrics || s.title);
+    return `<button class="sptile ${isDone ? 'done' : part ? 'part' : ''}" data-k="${k}">
+      <span class="spi">${sp.icon}</span>
+      <span class="spt"><b>${sp.label}</b><small>${s.title ? '♪ ' + esc(s.title) : sp.desc}</small></span>
+      ${rc ? `<span class="rc">💬 ${rc}</span>` : ''}<span class="st">${isDone ? '완성' : part ? '만드는 중' : '아직'}</span></button>`;
+  }).join('');
+  $('#sprow').querySelectorAll('.sptile').forEach(t => t.onclick = () => openSong(t.dataset.k));
   $('#grid').innerHTML = html;
   $('#grid').querySelectorAll('.tile').forEach(t => t.onclick = () => openSong(+t.dataset.n));
   $('#bProgText').textContent = `완성한 응원가 ${done} / ${m.count}`;
@@ -582,7 +652,7 @@ function insertAt(ta, text){
 function buildModal(){
   const n = S.openN, m = S.room.meta, ce = canEditN(n), owner = S.me === n;
   M.built = ce;
-  $('#mNum').textContent = n + '번';
+  $('#mNum').textContent = isSp(n) ? SPECIAL[n].icon : n + '번';
   const canRec = S.role === 'student' && !owner && !m.locked;
   $('#mBody').innerHTML = `
     <div class="sec">
@@ -590,8 +660,8 @@ function buildModal(){
       <div class="frame" id="mFrame"></div>
       ${ce ? `
         <div class="grid2" style="margin-top:10px">
-          <div><label class="f" style="margin-top:0">선수 이름</label><input id="mName" class="inp info" maxlength="10" placeholder="응원가에 들어갈 이름"></div>
-          <div><label class="f" style="margin-top:0">원곡 제목</label><input id="mSong" class="inp info" maxlength="40" placeholder="예: 원곡 노래 제목 - 가수"></div>
+          ${isSp(n) ? '' : `<div><label class="f" style="margin-top:0">선수 이름</label><input id="mName" class="inp info" maxlength="10" placeholder="응원가에 들어갈 이름"></div>`}
+          <div style="${isSp(n) ? 'grid-column:1/-1' : ''}"><label class="f" style="margin-top:0">원곡 제목</label><input id="mSong" class="inp info" maxlength="40" placeholder="예: 원곡 노래 제목 - 가수"></div>
         </div>
         <label class="f">유튜브 링크</label>
         <div class="row">
@@ -606,6 +676,7 @@ function buildModal(){
       ${ce ? `
         <div class="muted" style="font-size:13px">추천 틀을 누르면 가사에 들어가요</div>
         <div class="chips">${chipsHTML(n)}</div>
+        ${n === 'lineup' ? `<div class="row" style="margin:4px 0 8px"><button type="button" class="btn ghost sm" id="mLineup">🧢 우리 반 라인업 불러오기</button><span class="muted" style="font-size:14px">1번부터 이름을 차례로 넣어요</span></div>` : ''}
         <textarea id="mLyr" class="inp" style="min-height:160px;font-family:var(--fb);font-weight:600;font-size:19px" placeholder="노래에 맞춰 응원 가사를 적어 보세요"></textarea>
         <div class="row" style="justify-content:space-between;margin-top:8px">
           <span class="cnt" id="mCnt"></span>
@@ -613,11 +684,14 @@ function buildModal(){
         </div>` : `<div class="lyrview" id="mLyrView"></div>`}
     </div>
     <div class="sec">
-      <h3>💬 친구 추천 가사 <small>${owner ? '마음에 드는 추천을 가사에 넣어 보세요' : canRec ? '친구에게 어울리는 가사를 추천해 주세요 (한 친구에게 3개까지)' : ''}</small></h3>
+      <h3>💬 친구 추천 가사 <small>${owner ? '마음에 드는 추천을 가사에 넣어 보세요' : canRec ? (isSp(n) ? `우리 반 ${SPECIAL[n].label}에 넣을 가사를 추천해 주세요 (3개까지)` : '친구에게 어울리는 가사를 추천해 주세요 (한 친구에게 3개까지)') : (isSp(n) && S.role === 'teacher' ? '학생들의 추천을 가사에 넣어 완성해 보세요' : '')}</small></h3>
       <div id="mRecs"></div>
       ${canRec ? `
         <div class="chips">${chipsHTML(n)}</div>
-        <div class="row"><input id="mRecIn" class="inp" style="flex:1;min-width:0" maxlength="80" placeholder="추천 가사 한 줄"><button class="btn" id="mRecBtn">추천하기</button></div>` : ''}
+        <input id="mRecUrl" class="inp" style="margin-bottom:6px" placeholder="🎵 추천 노래 유튜브 링크 (선택)">
+        <input id="mRecSong" class="inp" style="margin-bottom:6px" maxlength="40" placeholder="원곡 제목 (선택)">
+        <textarea id="mRecIn" class="inp" style="min-height:80px" maxlength="200" placeholder="추천 가사 (여러 줄 가능, 200자까지)"></textarea>
+        <div class="row" style="justify-content:flex-end;margin-top:6px"><button class="btn" id="mRecBtn">추천하기</button></div>` : ''}
     </div>
     ${S.role === 'teacher' ? `<div class="row" style="justify-content:flex-end"><button class="btn red sm" id="mClear">이 응원가 비우기</button></div>` : ''}`;
 
@@ -628,18 +702,21 @@ function buildModal(){
     const ta = $('#mLyr');
     ta.oninput = () => { M.dirtyLyr = true; $('#mLyrSaved').textContent = ''; updateCount(); };
     $('#mLyrBtn').onclick = saveLyrics;
+    if ($('#mLineup')) $('#mLineup').onclick = () => {
+      const lines = []; for (let i = 1; i <= S.room.meta.count; i++){ const nm = playerName(i); lines.push(`${i}번 ${nm || ''}`.trim() + '!'); }
+      insertAt(ta, lines.join('\n'));
+    };
     $('#mBody').querySelectorAll('.sec:nth-child(2) .tchip').forEach(b => b.onclick = () => insertAt(ta, fill(b.dataset.t, n)));
   }
   if (canRec){
     const ri = $('#mRecIn');
     $('#mBody').querySelectorAll('.sec:nth-child(3) .tchip').forEach(b => b.onclick = () => { ri.value = (ri.value ? ri.value.replace(/\s*$/, ' ') : '') + fill(b.dataset.t, n); ri.focus(); });
     $('#mRecBtn').onclick = sendRec;
-    ri.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); sendRec(); } };
   }
   $('#mBig').onclick = openBig;
   if ($('#mClear')) $('#mClear').onclick = async () => {
-    if (!confirm(n + '번 응원가(노래·가사·추천)를 모두 지울까요?')) return;
-    await Store.set(S.code, ['songs', 'n' + n], null); await Store.set(S.code, ['recs', 'n' + n], null);
+    if (!confirm((isSp(n) ? SPECIAL[n].label : n + '번 응원가') + '(노래·가사·추천)를 모두 지울까요?')) return;
+    await Store.set(S.code, ['songs', keyOf(n)], null); await Store.set(S.code, ['recs', keyOf(n)], null);
     M.dirtyInfo = M.dirtyLyr = false; toast('지웠어요');
   };
   updateModal();
@@ -651,18 +728,18 @@ function updateModal(){
   const n = S.openN; if (!n || !S.room) return;
   if (canEditN(n) !== M.built) return buildModal();
   const s = song(n), nm = playerName(n);
-  $('#mTitle').textContent = (nm ? nm + ' ' : '') + '응원가';
+  $('#mTitle').textContent = isSp(n) ? SPECIAL[n].label : (nm ? nm + ' ' : '') + '응원가';
   const id = ytId(s.url), key = id ? id + '@' + (s.start || 0) : '';
   if (key !== M.frameKey || !$('#mFrame').innerHTML){
     M.frameKey = key;
     $('#mFrame').innerHTML = id ? ytEmbed(id, s.start) : `<div class="noframe">🎵<br>${M.built ? '아래에 유튜브 링크를 넣어 주세요' : '아직 노래가 없어요'}</div>`;
   }
   if (M.built){
-    if (!M.dirtyInfo){ $('#mName').value = nm; $('#mSong').value = s.title || ''; $('#mUrl').value = s.url || ''; $('#mStart').value = s.start || ''; }
+    if (!M.dirtyInfo){ if ($('#mName')) $('#mName').value = nm; $('#mSong').value = s.title || ''; $('#mUrl').value = s.url || ''; $('#mStart').value = s.start || ''; }
     if (!M.dirtyLyr) $('#mLyr').value = s.lyrics || '';
     updateCount();
   } else {
-    $('#mInfoView').innerHTML = `<div><span>선수</span>${esc(nm) || '-'}</div><div><span>원곡</span>${esc(s.title) || '-'}</div>`;
+    $('#mInfoView').innerHTML = (isSp(n) ? '' : `<div><span>선수</span>${esc(nm) || '-'}</div>`) + `<div><span>원곡</span>${esc(s.title) || '-'}</div>`;
     const v = $('#mLyrView'); v.textContent = s.lyrics || '아직 가사가 없어요.'; v.classList.toggle('empty', !s.lyrics);
   }
   renderRecs();
@@ -673,24 +750,32 @@ function renderRecs(){
   const canUse = canEditN(n);
   $('#mRecs').innerHTML = list.length ? list.map(([id, r]) => {
     const canDel = S.role === 'teacher' || S.me === n || (S.me && r.from === S.me);
-    return `<div class="rec"><div class="rtext">${esc(r.text)}</div><div class="rmeta">${r.from}번 친구의 추천
-      ${canUse ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
+    const rid = ytId(r.url);
+    return `<div class="rec">${rid ? `<div class="rsong">🎵 <a href="https://www.youtube.com/watch?v=${rid}${r.start ? '&t=' + r.start + 's' : ''}" target="_blank" rel="noopener">${esc(r.title || '추천 노래 듣기')}</a></div>` : (r.title ? `<div class="rsong">🎵 ${esc(r.title)}</div>` : '')}
+      ${r.text ? `<div class="rtext">${esc(r.text)}</div>` : ''}<div class="rmeta">${r.from}번 친구의 추천
+      ${canUse && rid ? `<button data-song="${id}">이 노래로 바꾸기</button>` : ''}${canUse && r.text ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
   }).join('') : '<p class="muted" style="margin:0 0 8px">아직 추천이 없어요.</p>';
   $('#mRecs').querySelectorAll('[data-use]').forEach(b => b.onclick = () => {
     const r = recsOf(n)[b.dataset.use]; const ta = $('#mLyr'); if (!r || !ta) return;
     ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, '') + '\n' + r.text : r.text;
     ta.dispatchEvent(new Event('input')); toast('가사에 넣었어요. "가사 저장"을 눌러 주세요!');
   });
-  $('#mRecs').querySelectorAll('[data-del]').forEach(b => b.onclick = () => Store.set(S.code, ['recs', 'n' + n, b.dataset.del], null));
+  $('#mRecs').querySelectorAll('[data-song]').forEach(b => b.onclick = () => {
+    const r = recsOf(n)[b.dataset.song]; if (!r || !$('#mUrl')) return;
+    $('#mUrl').value = r.url; $('#mStart').value = r.start || ytStart(r.url) || '';
+    if (r.title) $('#mSong').value = r.title;
+    M.dirtyInfo = true; saveInfo().then(() => toast('추천받은 노래로 바꿨어요!'));
+  });
+  $('#mRecs').querySelectorAll('[data-del]').forEach(b => b.onclick = () => Store.set(S.code, ['recs', keyOf(n), b.dataset.del], null));
 }
 
 async function saveInfo(){
-  const n = S.openN, name = $('#mName').value.trim(), title = $('#mSong').value.trim(), url = $('#mUrl').value.trim();
+  const n = S.openN, name = $('#mName') ? $('#mName').value.trim() : '', title = $('#mSong').value.trim(), url = $('#mUrl').value.trim();
   if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
   for (const t of [name, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
   const start = Math.max(0, parseInt($('#mStart').value, 10) || ytStart(url) || 0);
   try {
-    await Store.update(S.code, ['songs', 'n' + n], { name: name.slice(0, 10), title: title.slice(0, 40), url, start, updatedAt: Date.now() });
+    await Store.update(S.code, ['songs', keyOf(n)], { ...(isSp(n) ? {} : { name: name.slice(0, 10) }), title: title.slice(0, 40), url, start, updatedAt: Date.now() });
     M.dirtyInfo = false; $('#mInfoSaved').textContent = '저장했어요 ✓'; updateModal();
   } catch(e){ toast('저장하지 못했어요', true); }
 }
@@ -701,19 +786,23 @@ async function saveLyrics(){
   const b = checkText(ly); if (b) return toast(badMsg(b), true);
   if (M.dirtyInfo) await saveInfo();
   try {
-    await Store.update(S.code, ['songs', 'n' + n], { lyrics: ly, updatedAt: Date.now() });
+    await Store.update(S.code, ['songs', keyOf(n)], { lyrics: ly, updatedAt: Date.now() });
     M.dirtyLyr = false; $('#mLyrSaved').textContent = '저장했어요 ✓';
   } catch(e){ toast('저장하지 못했어요', true); }
 }
 
 async function sendRec(){
-  const n = S.openN, ri = $('#mRecIn'), text = ri.value.trim();
-  if (!text) return;
-  if (text.length > 80) return toast('추천은 80자까지 쓸 수 있어요', true);
-  const b = checkText(text); if (b) return toast(badMsg(b), true);
+  const n = S.openN, ri = $('#mRecIn'), text = ri.value.trim(), url = $('#mRecUrl').value.trim(), title = $('#mRecSong').value.trim();
+  if (!text && !url) return toast('추천 가사나 노래 링크를 넣어 주세요', true);
+  if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
+  if (text.length > 200) return toast('추천 가사는 200자까지 쓸 수 있어요', true);
+  for (const t of [text, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
   const mine = Object.values(recsOf(n)).filter(r => r.from === S.me).length;
   if (mine >= 3) return toast('한 친구에게는 3개까지 추천할 수 있어요. 지우고 다시 써 보세요', true);
-  try { await Store.push(S.code, ['recs', 'n' + n], { from: S.me, text, at: Date.now() }); ri.value = ''; toast('추천했어요! 👍'); }
+  const rec = { from: S.me, text, at: Date.now() };
+  if (url){ rec.url = url; rec.start = ytStart(url) || 0; }
+  if (title) rec.title = title.slice(0, 40);
+  try { await Store.push(S.code, ['recs', keyOf(n)], rec); ri.value = ''; $('#mRecUrl').value = ''; $('#mRecSong').value = ''; toast('추천했어요! 👍'); }
   catch(e){ toast('추천하지 못했어요', true); }
 }
 
@@ -721,8 +810,8 @@ async function sendRec(){
 function openBig(){
   const n = S.openN, s = song(n), id = ytId(s.url);
   const ly = ($('#mLyr') ? $('#mLyr').value : s.lyrics) || '';
-  $('#bigFrame').innerHTML = id ? ytEmbed(id, s.start) : '<div class="noframe">🎵 노래 없음</div>';
-  $('#bigName').textContent = `${n}번 ${playerName(n)}`.trim();
+  $('#bigFrame').innerHTML = id ? ytEmbed(id, s.start, true) : '<div class="noframe">🎵 노래 없음</div>';
+  $('#bigName').textContent = isSp(n) ? `${S.room.meta.short || '우리 반'} ${SPECIAL[n].label}` : `${n}번 ${playerName(n)}`.trim();
   $('#bigSong').textContent = s.title ? '♪ ' + s.title : '';
   $('#bigLyr').textContent = ly || '아직 가사가 없어요.';
   $('#mFrame').innerHTML = ''; M.frameKey = '';   // 소리 겹침 방지
@@ -744,7 +833,7 @@ let setTpl;
 function openSettings(){
   const m = S.room.meta;
   $('#eSchool').value = m.school || ''; $('#ePin').value = ''; $('#ePin2').value = '';
-  $('#eClass').value = m.className || ''; $('#eShort').value = m.short || ''; $('#eCount').value = m.count;
+  $('#eClass').value = m.className || ''; $('#eShort').value = m.short || ''; $('#eTeam').value = m.team || ''; $('#eCount').value = m.count;
   $('#eNames').value = (m.names || []).join('\n'); $('#eBan').value = (m.banned || []).join(', '); $('#eLock').checked = !!m.locked;
   setTpl = chipEditor($('#eTpl'), m.templates || []);
   $('#setView').hidden = false;
@@ -756,6 +845,7 @@ async function saveSettings(){
   while (names.length && !names[names.length - 1]) names.pop();
   const school = $('#eSchool').value.trim();
   if (!school) return toast('학교 이름을 넣어 주세요', true);
+  { const b = checkText($('#eTeam').value); if (b) return toast(badMsg(b), true); }
   const np = $('#ePin').value.trim(), extra = {};
   if (np || $('#ePin2').value.trim()){
     if (np.length < 4 || np.length > 20) return toast('새 비밀번호는 4~20자로 넣어 주세요', true);
@@ -764,7 +854,7 @@ async function saveSettings(){
   }
   await Store.update(S.code, ['meta'], {
     ...extra, school: school.slice(0, 30),
-    className: $('#eClass').value.trim() || '우리 반 발야구 응원가', short: $('#eShort').value.trim(), count, names,
+    className: $('#eClass').value.trim() || '우리 반 발야구 응원가', short: $('#eShort').value.trim(), team: $('#eTeam').value.trim().slice(0, 15), count, names,
     templates: setTpl.get(), banned: $('#eBan').value.split(',').map(s => s.trim()).filter(Boolean), locked: $('#eLock').checked
   });
   $('#setView').hidden = true; toast(extra.pin ? '설정과 새 비밀번호를 저장했어요' : '설정을 저장했어요');
@@ -793,9 +883,9 @@ async function deleteRoom(){
 
 function openAll(){
   const m = S.room.meta; let h = '';
-  for (let n = 1; n <= m.count; n++){
+  for (const n of [...Object.keys(SPECIAL), ...Array.from({ length: m.count }, (_, i) => i + 1)]){
     const s = song(n); if (!s.lyrics && !s.url && !s.title) continue;
-    h += `<div class="allitem"><h4>${n}번 ${esc(playerName(n))}</h4>
+    h += `<div class="allitem"><h4>${isSp(n) ? SPECIAL[n].icon + ' ' + SPECIAL[n].label : n + '번 ' + esc(playerName(n))}</h4>
       <div class="s">${s.title ? '♪ ' + esc(s.title) : ''}${s.url ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>${s.start ? ' (' + s.start + '초부터)' : ''}` : ''}</div>
       <div class="l">${esc(s.lyrics || '')}</div></div>`;
   }

@@ -306,7 +306,7 @@ label.f small{font-size:14px}
       </div>
       <div id="jCodeFixed" class="muted" style="margin-top:8px" hidden></div>
       <label class="f">내 번호</label>
-      <input id="jNum" class="inp" type="number" inputmode="numeric" min="1" max="40" placeholder="번호" style="font-size:40px;text-align:center;font-family:var(--ft)">
+      <input id="jNum" class="inp" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" placeholder="번호" style="font-size:40px;text-align:center;font-family:var(--ft)">
       <div class="row" style="margin-top:18px;justify-content:space-between">
         <button class="btn ghost" onclick="goHome()">처음으로</button>
         <button class="btn gold" onclick="doJoin()">입장하기 ⚾</button>
@@ -551,11 +551,14 @@ const BANNED = {
   '유행어': ['킹받','어쩔티비','저쩔티비','어쩔','저쩔','안물안궁','안물','레게노','오진다','오지네','오지고','지린다','지리네','지렸','쩐다','쩔어','쩔지','개웃','개쩔','개꿀','개좋','개잘','개쎄','꿀잼','노잼','핵잼','킹정','억까','갑분싸','국룰','중꺾마','럭키비키','원영적','폼미쳤','너t야','마라탕후루','탕탕후루','스키비디','알잘딱','무야호','ㄹㅇ','ㅇㅈ','ㄱㅇㄷ','ㅋㅋ','ㅎㅎ','ㅠㅠ','ㄷㄷ']
 };
 const norm = s => String(s || '').toLowerCase().replace(/[^a-z가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
-function checkText(text){
-  const t = norm(text); if (!t) return null;
-  const extra = ((S.room && S.room.meta && S.room.meta.banned) || []).filter(Boolean);
-  for (const w of extra){ const n = norm(w); if (n && t.includes(n)) return { cat: '선생님이 정한 금지어', word: w }; }
-  for (const w of ((S.room && S.room.meta && S.room.meta.rivals) || []).filter(Boolean)){ const n = norm(w); if (n && t.includes(n)) return { cat: '상대 팀 이름', word: w }; }
+// 숫자를 살려서 비교 (예: '1반'이 '반' 으로 줄어들어 아무 데나 걸리지 않게)
+const normD = s => String(s || '').toLowerCase().replace(/[^0-9a-z가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
+function checkText(text, opt){
+  opt = opt || {};
+  const t = norm(text), td = normD(text); if (!td) return null;
+  const meta = (S.room && S.room.meta) || {};
+  for (const w of (meta.banned || []).filter(Boolean)){ const n = normD(w); if (n && td.includes(n)) return { cat: '선생님이 정한 금지어', word: w }; }
+  if (!opt.teacher) for (const w of (meta.rivals || []).filter(Boolean)){ const n = normD(w); if (n && td.includes(n)) return { cat: '상대 팀 이름', word: w }; }
   for (const cat in BANNED) for (const w of BANNED[cat]){ const n = norm(w); if (n && t.includes(n)) return { cat, word: w }; }
   return null;
 }
@@ -631,7 +634,7 @@ function chipEditor(el, items){
       <div class="row"><input class="inp" style="flex:1;min-width:0" placeholder="추천 틀 추가 (예: 무적OO)"><button type="button" class="btn sm">추가</button></div>`;
     el.querySelectorAll('.chip button').forEach(b => b.onclick = () => { list.splice(+b.dataset.i, 1); draw(); });
     const inp = el.querySelector('input');
-    const add = () => { const v = inp.value.trim(); if (!v) return; const b = checkText(v); if (b){ toast(badMsg(b), true); return; }
+    const add = () => { const v = inp.value.trim(); if (!v) return; const b = checkText(v, { teacher: true }); if (b){ toast(badMsg(b), true); return; }
       if (!list.includes(v)) list.push(v); draw(); el.querySelector('input').focus(); };
     el.querySelector('.row button').onclick = add;
     inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); add(); } };
@@ -801,7 +804,7 @@ function buildModal(){
   const n = S.openN, m = S.room.meta, ce = canEditN(n), owner = S.me === n;
   M.built = ce;
   $('#mNum').textContent = isSp(n) ? SPECIAL[n].icon : n + '번';
-  const canRec = S.role === 'student' && !owner && !m.locked;
+  const canRec = (S.role === 'student' && !owner && !m.locked) || (S.role === 'teacher' && !isSp(n));
   $('#mBody').innerHTML = `
     <div class="sec">
       <h3>🎵 노래 <small>교실 수업용 · 외부 공유 금지</small></h3>
@@ -834,7 +837,7 @@ function buildModal(){
         </div>` : `<div class="lyrview" id="mLyrView"></div>`}
     </div>
     <div class="sec">
-      <h3>💬 친구 추천 가사 <small>${owner ? '마음에 드는 추천을 가사에 넣어 보세요' : canRec ? (isSp(n) ? `우리 반 ${SPECIAL[n].label}에 넣을 가사를 추천해 주세요 (3개까지)` : '친구에게 어울리는 가사를 추천해 주세요 (한 친구에게 3개까지)') : (isSp(n) && S.role === 'teacher' ? '학생들의 추천을 가사에 넣어 완성해 보세요' : '')}</small></h3>
+      <h3>💬 친구 추천 가사 <small>${owner ? '마음에 드는 추천을 가사에 넣어 보세요' : canRec ? (S.role === 'teacher' ? '선생님도 노래나 가사를 추천할 수 있어요 (쓸지는 학생이 골라요)' : isSp(n) ? `우리 반 ${SPECIAL[n].label}에 넣을 가사를 추천해 주세요 (3개까지)` : '친구에게 어울리는 가사를 추천해 주세요 (한 친구에게 3개까지)') : (isSp(n) && S.role === 'teacher' ? '학생들의 추천을 가사에 넣어 완성해 보세요' : '')}</small></h3>
       <div id="mRecs"></div>
       ${canRec ? `
         <div class="chips">${chipsHTML(n)}</div>
@@ -940,7 +943,7 @@ function renderRecs(){
     const canDel = S.role === 'teacher' || S.me === n || (S.me && r.from === S.me);
     const rid = ytId(r.url);
     return `<div class="rec ${sp && top && v === top ? 'win' : ''}">${voteHTML ? `<div class="vrow">${voteHTML}</div>` : ''}${rid ? `<div class="rsong">🎵 <a href="https://www.youtube.com/watch?v=${rid}${r.start ? '&t=' + r.start + 's' : ''}" target="_blank" rel="noopener">${esc(r.title || '추천 노래 듣기')}</a></div>` : (r.title ? `<div class="rsong">🎵 ${esc(r.title)}</div>` : '')}
-      ${r.text ? `<div class="rtext">${esc(r.text)}</div>` : ''}${r.used ? `<div class="thanks">❤️ 고마워! 응원가에 쓰였어요</div>` : ''}<div class="rmeta">${r.from}번 친구의 추천
+      ${r.text ? `<div class="rtext">${esc(r.text)}</div>` : ''}${r.used ? `<div class="thanks">❤️ 고마워! 응원가에 쓰였어요</div>` : ''}<div class="rmeta">${r.from === 'T' ? '👩‍🏫 선생님' : r.from + '번 친구'}의 추천
       ${canUse && rid ? `<button data-song="${id}">이 노래로 바꾸기</button>` : ''}${canUse && r.text ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
   }).join('') : '<p class="muted" style="margin:0 0 8px">아직 추천이 없어요.</p>');
   $('#mRecs').querySelectorAll('[data-vote]').forEach(b => b.onclick = async () => {
@@ -966,7 +969,7 @@ function renderRecs(){
 async function saveInfo(){
   const n = S.openN, name = $('#mName') ? $('#mName').value.trim() : '', title = $('#mSong').value.trim(), url = $('#mUrl').value.trim();
   if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
-  for (const t of [name, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
+  for (const t of [name, title]){ const b = checkText(t, { teacher: S.role === 'teacher' }); if (b) return toast(badMsg(b), true); }
   const start = Math.max(0, parseInt($('#mStart').value, 10) || ytStart(url) || 0);
   const end = Math.max(0, parseInt($('#mEnd').value, 10) || 0);
   if (end && end <= start) return toast('끝(초)은 시작(초)보다 커야 해요', true);
@@ -979,7 +982,7 @@ async function saveInfo(){
 async function saveLyrics(){
   const n = S.openN, ly = $('#mLyr').value.replace(/\s+$/, '');
   if (ly.length > 600) return toast('가사는 600자까지 쓸 수 있어요', true);
-  const b = checkText(ly); if (b) return toast(badMsg(b), true);
+  const b = checkText(ly, { teacher: S.role === 'teacher' }); if (b) return toast(badMsg(b), true);
   if (M.dirtyInfo) await saveInfo();
   try {
     await Store.update(S.code, ['songs', keyOf(n)], { lyrics: ly, updatedAt: Date.now(), ...approvalReset() });
@@ -996,9 +999,9 @@ async function sendRec(){
   if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
   if (text.length > 200) return toast('추천 가사는 200자까지 쓸 수 있어요', true);
   for (const t of [text, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
-  const mine = Object.values(recsOf(n)).filter(r => r.from === S.me).length;
+  const mine = S.role === 'teacher' ? 0 : Object.values(recsOf(n)).filter(r => r.from === S.me).length;
   if (mine >= 3) return toast('한 친구에게는 3개까지 추천할 수 있어요. 지우고 다시 써 보세요', true);
-  const rec = { from: S.me, text, at: Date.now() };
+  const rec = { from: S.role === 'teacher' ? 'T' : S.me, text, at: Date.now() };
   if (url){ rec.url = url; rec.start = ytStart(url) || 0; }
   if (title) rec.title = title.slice(0, 40);
   try { await Store.push(S.code, ['recs', keyOf(n)], rec); ri.value = ''; $('#mRecUrl').value = ''; $('#mRecSong').value = ''; toast('추천했어요! 👍'); }
@@ -1096,8 +1099,8 @@ async function saveSettings(){
   while (names.length && !names[names.length - 1]) names.pop();
   const school = $('#eSchool').value.trim();
   if (!school) return toast('학교 이름을 넣어 주세요', true);
-  { const b = checkText($('#eTeam').value); if (b) return toast(badMsg(b), true); }
-  { const b = checkText($('#eRuleText').value); if (b) return toast(badMsg(b), true); }
+  { const b = checkText($('#eTeam').value, { teacher: true }); if (b) return toast(badMsg(b), true); }
+  { const b = checkText($('#eRuleText').value, { teacher: true }); if (b) return toast(badMsg(b), true); }
   const parseOrd = s => { const a = []; for (const x of s.split(/[,\s]+/)){ const v = parseInt(x, 10); if (v >= 1 && v <= count && !a.includes(v)) a.push(v); } return a; };
   const orders = [], order = parseOrd($('#eOrd0').value);
   orders.push({ name: $('#eOrdN0').value.trim().slice(0, 10) || '전체 경기', list: order, all: true });
@@ -1177,6 +1180,10 @@ document.addEventListener('keydown', e => {
   if (!$('#songModal').hidden) closeSong();
 });
 ['#jCode', '#jNum'].forEach(s => $(s).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
+// 번호 칸: 숫자만 남기기
+$('#jNum').addEventListener('input', e => { const v = e.target.value.replace(/[^0-9]/g, '').slice(0, 2); if (v !== e.target.value) e.target.value = v; });
+// 숫자 칸에서 휠·스크롤로 값이 바뀌지 않게
+document.addEventListener('wheel', e => { const a = document.activeElement; if (a && a.type === 'number' && e.target === a) a.blur(); }, { passive: true });
 $('#rPin').addEventListener('keydown', e => { if (e.key === 'Enter') doReopen(); });
 $('#modeBadge').textContent = ONLINE ? '🟢 온라인 모드' : '💻 로컬 모드 · 이 기기에서만 저장돼요';
 

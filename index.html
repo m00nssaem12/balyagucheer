@@ -196,8 +196,8 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
       <h2 style="margin:0 0 4px">📋 우리 반 방 다시 열기</h2>
       <label class="f">방 코드</label>
       <input id="rCode" class="inp" maxlength="4" style="text-transform:uppercase;letter-spacing:4px">
-      <label class="f">선생님 비밀번호 (숫자 4자리)</label>
-      <input id="rPin" class="inp" type="password" inputmode="numeric" maxlength="4">
+      <label class="f">선생님 비밀번호</label>
+      <input id="rPin" class="inp" type="password" maxlength="20" autocomplete="current-password">
       <div class="row" style="margin-top:18px;justify-content:space-between">
         <button class="btn ghost" onclick="goHome()">처음으로</button>
         <button class="btn" onclick="doReopen()">열기</button>
@@ -209,13 +209,18 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
   <section id="setup" class="screen" hidden>
     <div class="card narrow" style="margin-top:20px">
       <h2 style="margin:0">📋 응원가 방 만들기</h2>
+      <label class="f">학교 이름</label><input id="sSchool" class="inp" maxlength="30" placeholder="예: 행복초등학교">
       <div class="grid2">
         <div><label class="f">방 이름</label><input id="sClass" class="inp" placeholder="예: 5학년 3반 발야구"></div>
         <div><label class="f">반 부르는 이름 <small>'O반' 자리에 들어가요</small></label><input id="sShort" class="inp" placeholder="예: 3반"></div>
       </div>
       <div class="grid2">
         <div><label class="f">반 인원</label><input id="sCount" class="inp" type="number" min="1" max="40" value="24"></div>
-        <div><label class="f">선생님 비밀번호 <small>숫자 4자리</small></label><input id="sPin" class="inp" type="password" inputmode="numeric" maxlength="4"></div>
+        <div><label class="f">선생님 비밀번호 <small>4~20자 · 글자·숫자·기호 모두 가능</small></label><input id="sPin" class="inp" type="password" maxlength="20" autocomplete="new-password"></div>
+      </div>
+      <div class="grid2">
+        <div></div>
+        <div><label class="f" style="margin-top:6px">비밀번호 확인</label><input id="sPin2" class="inp" type="password" maxlength="20" autocomplete="new-password"></div>
       </div>
       <label class="f">학생 이름 <small>선택 · 한 줄에 한 명, 1번부터 (비우면 학생이 직접 입력)</small></label>
       <textarea id="sNames" class="inp" placeholder="김민수&#10;이서연&#10;..."></textarea>
@@ -234,6 +239,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
   <section id="board" class="screen" hidden>
     <div class="topbar">
       <div>
+        <div class="who" id="bSchool" style="opacity:.8"></div>
         <h1 id="bTitle"></h1>
         <div class="who" id="bWho"></div>
       </div>
@@ -274,6 +280,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 <div class="ov" id="shareView" hidden>
   <div class="modal" style="max-width:480px;text-align:center">
     <div class="mhead"><div class="title">참여 안내</div><button class="x" onclick="$('#shareView').hidden=true">✕</button></div>
+    <div style="font-family:'Jua';font-size:20px" id="shName"></div>
     <div class="muted">방 코드</div>
     <div class="codebig" id="shCode"></div>
     <div id="qr"></div>
@@ -289,6 +296,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 <div class="ov" id="setView" hidden>
   <div class="modal">
     <div class="mhead"><div class="title">⚙️ 설정</div><button class="x" onclick="$('#setView').hidden=true">✕</button></div>
+    <label class="f">학교 이름</label><input id="eSchool" class="inp" maxlength="30">
     <div class="grid2">
       <div><label class="f">방 이름</label><input id="eClass" class="inp"></div>
       <div><label class="f">반 부르는 이름</label><input id="eShort" class="inp"></div>
@@ -298,6 +306,11 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
     <textarea id="eNames" class="inp"></textarea>
     <label class="f">추천 틀</label><div id="eTpl"></div>
     <label class="f">추가 금지어 <small>쉼표로 구분</small></label><input id="eBan" class="inp">
+    <label class="f">비밀번호 바꾸기 <small>바꿀 때만 입력 · 4~20자</small></label>
+    <div class="grid2">
+      <input id="ePin" class="inp" type="password" maxlength="20" placeholder="새 비밀번호" autocomplete="new-password">
+      <input id="ePin2" class="inp" type="password" maxlength="20" placeholder="새 비밀번호 확인" autocomplete="new-password">
+    </div>
     <label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="eLock" style="width:20px;height:20px"> 잠그기 (학생들이 더 이상 고치거나 추천할 수 없어요)</label>
     <div class="row" style="margin-top:16px;justify-content:flex-end">
       <button class="btn gold" onclick="saveSettings()">저장</button>
@@ -455,7 +468,10 @@ function showJoin(fixedCode){
 async function createRoom(){
   const count = parseInt($('#sCount').value, 10), pin = $('#sPin').value.trim();
   if (!(count >= 1 && count <= 40)) return toast('반 인원은 1~40명으로 넣어 주세요', true);
-  if (!/^\d{4}$/.test(pin)) return toast('선생님 비밀번호는 숫자 4자리로 넣어 주세요', true);
+  const school = $('#sSchool').value.trim();
+  if (!school) return toast('학교 이름을 넣어 주세요', true);
+  if (pin.length < 4 || pin.length > 20) return toast('선생님 비밀번호는 4~20자로 넣어 주세요', true);
+  if (pin !== $('#sPin2').value.trim()) return toast('비밀번호 확인이 달라요', true);
   const names = $('#sNames').value.split('\n').map(s => s.trim()).slice(0, count);
   while (names.length && !names[names.length - 1]) names.pop();
   const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
@@ -464,6 +480,7 @@ async function createRoom(){
     if (!(await Store.get(code))) break;
   }
   const meta = {
+    school: school.slice(0, 30),
     className: $('#sClass').value.trim() || '우리 반 발야구 응원가', short: $('#sShort').value.trim(), count, names,
     templates: setupTpl.get(), banned: $('#sBan').value.split(',').map(s => s.trim()).filter(Boolean),
     pin: hash(pin), locked: false, createdAt: Date.now()
@@ -509,6 +526,7 @@ async function enterRoom(code, role, me){
 function renderBoard(){
   const r = S.room; if (!r || !r.meta) return; const m = r.meta;
   $('#bTitle').textContent = m.className;
+  $('#bSchool').textContent = m.school || '';
   $('#bWho').innerHTML = S.role === 'teacher'
     ? `<b>선생님</b> · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`
     : `<b>${S.me}번</b> 으로 들어왔어요 · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`;
@@ -706,6 +724,7 @@ function closeBig(){ $('#bigView').hidden = true; $('#bigFrame').innerHTML = '';
 /* ---------------- 선생님 도구 ---------------- */
 function joinLink(){ return location.origin + location.pathname + '?room=' + S.code; }
 function openShare(){
+  $('#shName').textContent = [S.room.meta.school, S.room.meta.className].filter(Boolean).join(' · ');
   $('#shCode').textContent = S.code; $('#shLink').value = joinLink(); $('#qr').innerHTML = '';
   if (typeof QRCode !== 'undefined') new QRCode($('#qr'), { text: joinLink(), width: 200, height: 200 });
   $('#shareView').hidden = false;
@@ -715,6 +734,7 @@ function copyLink(){ const i = $('#shLink'); i.select(); (navigator.clipboard ? 
 let setTpl;
 function openSettings(){
   const m = S.room.meta;
+  $('#eSchool').value = m.school || ''; $('#ePin').value = ''; $('#ePin2').value = '';
   $('#eClass').value = m.className || ''; $('#eShort').value = m.short || ''; $('#eCount').value = m.count;
   $('#eNames').value = (m.names || []).join('\n'); $('#eBan').value = (m.banned || []).join(', '); $('#eLock').checked = !!m.locked;
   setTpl = chipEditor($('#eTpl'), m.templates || []);
@@ -725,11 +745,20 @@ async function saveSettings(){
   if (!(count >= 1 && count <= 40)) return toast('반 인원은 1~40명이에요', true);
   const names = $('#eNames').value.split('\n').map(s => s.trim()).slice(0, count);
   while (names.length && !names[names.length - 1]) names.pop();
+  const school = $('#eSchool').value.trim();
+  if (!school) return toast('학교 이름을 넣어 주세요', true);
+  const np = $('#ePin').value.trim(), extra = {};
+  if (np || $('#ePin2').value.trim()){
+    if (np.length < 4 || np.length > 20) return toast('새 비밀번호는 4~20자로 넣어 주세요', true);
+    if (np !== $('#ePin2').value.trim()) return toast('새 비밀번호 확인이 달라요', true);
+    extra.pin = hash(np);
+  }
   await Store.update(S.code, ['meta'], {
+    ...extra, school: school.slice(0, 30),
     className: $('#eClass').value.trim() || '우리 반 발야구 응원가', short: $('#eShort').value.trim(), count, names,
     templates: setTpl.get(), banned: $('#eBan').value.split(',').map(s => s.trim()).filter(Boolean), locked: $('#eLock').checked
   });
-  $('#setView').hidden = true; toast('설정을 저장했어요');
+  $('#setView').hidden = true; toast(extra.pin ? '설정과 새 비밀번호를 저장했어요' : '설정을 저장했어요');
 }
 
 function closeAllOverlays(){
@@ -738,7 +767,7 @@ function closeAllOverlays(){
 }
 async function deleteRoom(){
   const m = S.room.meta;
-  const pin = prompt(`'${m.className}' 방을 삭제하려면 선생님 비밀번호 4자리를 입력하세요.\n삭제하면 되돌릴 수 없어요.`);
+  const pin = prompt(`'${m.className}' 방을 삭제하려면 선생님 비밀번호를 입력하세요.\n삭제하면 되돌릴 수 없어요.`);
   if (pin === null) return;
   if (hash(pin.trim()) !== m.pin) return toast('비밀번호가 달라요', true);
   if (!confirm(`정말 삭제할까요?\n방 코드 ${S.code}의 응원가가 모두 사라져요.`)) return;
@@ -761,7 +790,7 @@ function openAll(){
       <div class="s">${s.title ? '♪ ' + esc(s.title) : ''}${s.url ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>${s.start ? ' (' + s.start + '초부터)' : ''}` : ''}</div>
       <div class="l">${esc(s.lyrics || '')}</div></div>`;
   }
-  $('#allTitle').textContent = m.className + ' 응원가';
+  $('#allTitle').textContent = [m.school, m.className].filter(Boolean).join(' ') + ' 응원가';
   $('#allList').innerHTML = h || '<p class="muted">아직 만든 응원가가 없어요.</p>';
   $('#allView').hidden = false;
 }

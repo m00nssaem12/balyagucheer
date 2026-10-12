@@ -900,7 +900,8 @@ function renderRecs(){
   const n = S.openN, sp = isSp(n), vc = sp ? voteCounts(n) : {}, myVote = sp && S.me ? votesOf(n)['s' + S.me] : null;
   const list = Object.entries(recsOf(n)).sort((a, b) => sp && (vc[b[0]] || 0) !== (vc[a[0]] || 0) ? (vc[b[0]] || 0) - (vc[a[0]] || 0) : (a[1].at || 0) - (b[1].at || 0));
   const top = sp ? Math.max(0, ...Object.values(vc)) : 0, canVote = sp && S.role === 'student' && !S.room.meta.locked;
-  const canUse = canEditN(n);
+  // 학생 응원가의 추천은 그 번호 학생만 골라 쓸 수 있어요 (팀 응원가·라인업송은 선생님)
+  const canUse = sp ? canEditN(n) : (S.role === 'student' && S.me === n && !S.room.meta.locked);
   $('#mRecs').innerHTML = (sp && list.length ? `<div class="votehint">🗳 마음에 드는 추천에 <b>한 표</b>를 줘요. 다시 누르면 취소, 다른 걸 누르면 바뀌어요. (내 추천에는 투표할 수 없어요)</div>` : '') + (list.length ? list.map(([id, r]) => {
     const v = vc[id] || 0, mine = myVote === id, own = S.me && r.from === S.me;
     const voteHTML = sp ? `<span class="vbox ${top && v === top ? 'top' : ''}">${top && v === top ? '🏆 ' : ''}👍 ${v}표</span>${canVote && !own ? `<button class="vbtn ${mine ? 'on' : ''}" data-vote="${id}">${mine ? '✔ 내 투표' : '투표하기'}</button>` : ''}` : '';

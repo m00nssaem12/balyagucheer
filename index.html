@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>우리 반 발야구 응원가</title>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -12,20 +13,21 @@
 :root{
   --field:#1f6b3a; --field2:#247644; --chalk:#f8f5ea; --dirt:#c98a4b; --ink:#1b2a22;
   --gold:#ffcf3f; --red:#e2483d; --card:#fffdf6; --muted:#6b7a70; --line:#e4dfcf; --blue:#2f6fd6;
+  --ft:'Do Hyeon',sans-serif; --fb:'Pretendard Variable',Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;
 }
 *{box-sizing:border-box}
 html,body{margin:0}
 body{
-  font-family:'Noto Sans KR',sans-serif; color:var(--ink); min-height:100vh;
+  font-family:var(--fb); color:var(--ink); min-height:100vh;
   background:repeating-linear-gradient(90deg,var(--field) 0 90px,var(--field2) 90px 180px);
 }
 button{font-family:inherit;cursor:pointer}
 input,textarea,select{font-family:inherit;font-size:16px}
 .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
 .screen[hidden]{display:none!important}
-h1,h2,.title{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:.5px}
+h1,h2,.title{font-family:var(--ft);font-weight:400;letter-spacing:.5px}
 .card{background:var(--card);border-radius:20px;padding:24px;box-shadow:0 8px 0 rgba(0,0,0,.18)}
-.btn{border:0;border-radius:14px;padding:12px 18px;font-size:16px;font-weight:700;background:var(--ink);color:#fff;font-family:'Jua',sans-serif;transition:transform .08s}
+.btn{border:0;border-radius:14px;padding:12px 18px;font-size:16px;font-weight:700;background:var(--ink);color:#fff;font-family:var(--fb);transition:transform .08s}
 .btn:active{transform:translateY(2px)}
 .btn.gold{background:var(--gold);color:var(--ink)}
 .btn.red{background:var(--red)}
@@ -40,12 +42,12 @@ textarea.inp{resize:vertical;min-height:90px;line-height:1.6}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .muted{color:var(--muted)}
 .mode{display:inline-block;font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.25);color:#fff}
-footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30px;font-family:'Jua',sans-serif}
+footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30px;font-family:var(--fb)}
 
 /* home */
 .hero{text-align:center;color:#fff;padding:30px 0 20px}
 .hero h1{font-size:clamp(34px,7vw,64px);margin:0;text-shadow:0 4px 0 rgba(0,0,0,.25)}
-.hero p{font-family:'Jua',sans-serif;font-size:19px;opacity:.9;margin:8px 0 0}
+.hero p{font-family:var(--fb);font-size:19px;opacity:.9;margin:8px 0 0}
 .diamond{width:70px;height:70px;margin:0 auto 12px;border:5px solid var(--chalk);transform:rotate(45deg);border-radius:8px;position:relative;background:var(--dirt)}
 .diamond::after{content:'⚾';position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font-size:30px}
 .homegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:760px;margin:20px auto 0}
@@ -64,15 +66,15 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 /* board */
 .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:#fff;margin-bottom:14px}
 .topbar h1{margin:0;font-size:clamp(26px,5vw,40px);text-shadow:0 3px 0 rgba(0,0,0,.25)}
-.who{font-family:'Jua',sans-serif;font-size:17px;opacity:.95}
+.who{font-family:var(--fb);font-size:17px;opacity:.95}
 .who b{background:var(--gold);color:var(--ink);padding:2px 10px;border-radius:99px}
-.hint{background:rgba(0,0,0,.22);color:#fff;border-radius:14px;padding:12px 16px;font-family:'Jua',sans-serif;font-size:16px;margin-bottom:14px}
+.hint{background:rgba(0,0,0,.22);color:#fff;border-radius:14px;padding:12px 16px;font-family:var(--fb);font-size:16px;margin-bottom:14px}
 .prog{height:12px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden;margin:6px 0 16px}
 .prog i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .3s}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
 .tile{position:relative;border:0;border-radius:18px;background:var(--card);padding:14px 8px 12px;text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:132px}
 .tile:hover{transform:translateY(-2px)}
-.tile .num{font-family:'Black Han Sans',sans-serif;font-size:42px;line-height:1.1}
+.tile .num{font-family:var(--ft);font-size:42px;line-height:1.1}
 .tile .nm{font-weight:700;font-size:15px;min-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile .sg{font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:16px}
 .tile .st{font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:#eee;color:#777;margin-top:4px}
@@ -92,19 +94,19 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .mnum{background:var(--ink);color:#fff;border-radius:12px;padding:2px 12px;margin-right:6px}
 .x{border:0;background:#eee;border-radius:50%;width:40px;height:40px;font-size:20px;flex:none}
 .sec{border:2px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff}
-.sec h3{margin:0 0 10px;font-family:'Jua',sans-serif;font-weight:400;font-size:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.sec h3 small{font-family:'Noto Sans KR';font-size:13px;color:var(--muted)}
+.sec h3{margin:0 0 10px;font-family:var(--fb);font-weight:400;font-size:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sec h3 small{font-family:var(--fb);font-size:13px;color:var(--muted)}
 .frame{position:relative;width:100%;aspect-ratio:16/9;background:#111;border-radius:12px;overflow:hidden}
 .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.noframe{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#bbb;font-family:'Jua',sans-serif;font-size:18px;line-height:1.6}
-.songinfo{font-family:'Jua',sans-serif;font-size:19px;margin-top:10px}
+.noframe{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#bbb;font-family:var(--fb);font-size:18px;line-height:1.6}
+.songinfo{font-family:var(--fb);font-size:19px;margin-top:10px}
 .songinfo span{color:var(--muted);font-size:15px;margin-right:6px}
-.lyrview{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:22px;line-height:1.6;background:#fffbea;border-radius:12px;padding:14px;min-height:60px}
+.lyrview{white-space:pre-wrap;font-family:var(--fb);font-size:22px;line-height:1.6;background:#fffbea;border-radius:12px;padding:14px;min-height:60px}
 .lyrview.empty{color:#aaa;font-size:17px}
 .cnt{font-size:13px;color:var(--muted)}
 .saved{font-size:14px;color:#2a9d55;font-weight:700}
 .rec{border-left:5px solid var(--blue);background:#f3f7ff;border-radius:10px;padding:10px 12px;margin-bottom:8px}
-.rec .rtext{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:18px}
+.rec .rtext{white-space:pre-wrap;font-family:var(--fb);font-size:18px}
 .rec .rmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
 .rec .rmeta button{border:0;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;background:var(--blue);color:#fff}
 .rec .rmeta button.ghost{background:#e2e6ee;color:#555}
@@ -115,25 +117,32 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 #bigView{background:#0e2416;align-items:stretch;padding:0}
 .bigin{width:100%;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:20px 16px;color:#fff}
 .bigin .frame{max-width:520px}
-.bigname{font-family:'Black Han Sans',sans-serif;font-size:clamp(30px,6vw,56px);color:var(--gold);margin:14px 0 4px;text-align:center}
-.bigsong{font-family:'Jua',sans-serif;opacity:.75;margin-bottom:10px}
-.biglyr{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:clamp(28px,5vw,56px);line-height:1.5;text-align:center;max-width:1000px}
+.bigname{font-family:var(--ft);font-size:clamp(30px,6vw,56px);color:var(--gold);margin:14px 0 4px;text-align:center}
+.bigsong{font-family:var(--fb);opacity:.75;margin-bottom:10px}
+.biglyr{white-space:pre-wrap;font-family:var(--fb);font-size:clamp(28px,5vw,56px);line-height:1.5;text-align:center;max-width:1000px}
 .bigclose{position:fixed;top:14px;right:14px;z-index:5}
 
 /* share */
-.codebig{font-family:'Black Han Sans',sans-serif;font-size:64px;letter-spacing:10px;text-align:center;background:var(--ink);color:var(--gold);border-radius:16px;padding:8px 0;margin:8px 0}
+.codebig{font-family:var(--ft);font-size:64px;letter-spacing:10px;text-align:center;background:var(--ink);color:var(--gold);border-radius:16px;padding:8px 0;margin:8px 0}
 #qr{display:flex;justify-content:center;margin:14px 0}
 #qr img,#qr canvas{border:10px solid #fff;border-radius:8px}
 
 /* all view */
 .allitem{border-bottom:2px dashed var(--line);padding:12px 0;break-inside:avoid}
-.allitem h4{margin:0 0 4px;font-family:'Jua',sans-serif;font-weight:400;font-size:20px}
+.allitem h4{margin:0 0 4px;font-family:var(--fb);font-weight:400;font-size:20px}
 .allitem .s{font-size:14px;color:var(--muted)}
-.allitem .l{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:17px;margin-top:6px}
+.allitem .l{white-space:pre-wrap;font-family:var(--fb);font-size:17px;margin-top:6px}
 
-#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-family:'Jua',sans-serif;font-size:17px;z-index:200;max-width:90vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-family:var(--fb);font-size:17px;z-index:200;max-width:90vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.on{opacity:1}
 #toast.bad{background:var(--red)}
+
+/* 전광판 글씨 */
+h1,h2,.title,.btn,.sec h3,.tile .num,.tile .st,.mnum,.codebig,.bigname,.biglyr,.tile .me,.chip,.tchip,.who b,#toast{font-family:var(--ft);font-weight:400;letter-spacing:.3px}
+.btn{font-size:17px}
+.who,.hint,.hero p,.songinfo,.bigsong{font-weight:600}
+.lyrview,.rec .rtext,.allitem .l{font-weight:600}
+.tile .nm{font-weight:700}
 
 @media print{
   body{background:#fff}
@@ -182,7 +191,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
       </div>
       <div id="jCodeFixed" class="muted" style="margin-top:8px" hidden></div>
       <label class="f">내 번호</label>
-      <input id="jNum" class="inp" type="number" inputmode="numeric" min="1" max="40" placeholder="번호" style="font-size:40px;text-align:center;font-family:'Black Han Sans'">
+      <input id="jNum" class="inp" type="number" inputmode="numeric" min="1" max="40" placeholder="번호" style="font-size:40px;text-align:center;font-family:var(--ft)">
       <div class="row" style="margin-top:18px;justify-content:space-between">
         <button class="btn ghost" onclick="goHome()">처음으로</button>
         <button class="btn gold" onclick="doJoin()">입장하기 ⚾</button>
@@ -280,7 +289,7 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 <div class="ov" id="shareView" hidden>
   <div class="modal" style="max-width:480px;text-align:center">
     <div class="mhead"><div class="title">참여 안내</div><button class="x" onclick="$('#shareView').hidden=true">✕</button></div>
-    <div style="font-family:'Jua';font-size:20px" id="shName"></div>
+    <div style="font-family:var(--ft);font-size:22px" id="shName"></div>
     <div class="muted">방 코드</div>
     <div class="codebig" id="shCode"></div>
     <div id="qr"></div>
@@ -597,7 +606,7 @@ function buildModal(){
       ${ce ? `
         <div class="muted" style="font-size:13px">추천 틀을 누르면 가사에 들어가요</div>
         <div class="chips">${chipsHTML(n)}</div>
-        <textarea id="mLyr" class="inp" style="min-height:160px;font-family:'Jua';font-size:19px" placeholder="노래에 맞춰 응원 가사를 적어 보세요"></textarea>
+        <textarea id="mLyr" class="inp" style="min-height:160px;font-family:var(--fb);font-weight:600;font-size:19px" placeholder="노래에 맞춰 응원 가사를 적어 보세요"></textarea>
         <div class="row" style="justify-content:space-between;margin-top:8px">
           <span class="cnt" id="mCnt"></span>
           <span class="row"><span class="saved" id="mLyrSaved"></span><button class="btn gold" id="mLyrBtn">가사 저장</button></span>

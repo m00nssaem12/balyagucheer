@@ -1,0 +1,789 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>우리 반 발야구 응원가</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+:root{
+  --field:#1f6b3a; --field2:#247644; --chalk:#f8f5ea; --dirt:#c98a4b; --ink:#1b2a22;
+  --gold:#ffcf3f; --red:#e2483d; --card:#fffdf6; --muted:#6b7a70; --line:#e4dfcf; --blue:#2f6fd6;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:'Noto Sans KR',sans-serif; color:var(--ink); min-height:100vh;
+  background:repeating-linear-gradient(90deg,var(--field) 0 90px,var(--field2) 90px 180px);
+}
+button{font-family:inherit;cursor:pointer}
+input,textarea,select{font-family:inherit;font-size:16px}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+.screen[hidden]{display:none!important}
+h1,h2,.title{font-family:'Black Han Sans',sans-serif;font-weight:400;letter-spacing:.5px}
+.card{background:var(--card);border-radius:20px;padding:24px;box-shadow:0 8px 0 rgba(0,0,0,.18)}
+.btn{border:0;border-radius:14px;padding:12px 18px;font-size:16px;font-weight:700;background:var(--ink);color:#fff;font-family:'Jua',sans-serif;transition:transform .08s}
+.btn:active{transform:translateY(2px)}
+.btn.gold{background:var(--gold);color:var(--ink)}
+.btn.red{background:var(--red)}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.sm{padding:8px 12px;font-size:14px;border-radius:10px}
+.btn.chalk{background:rgba(255,255,255,.14);color:#fff;border:2px solid rgba(255,255,255,.35)}
+label.f{display:block;font-weight:700;margin:14px 0 6px}
+label.f small{font-weight:400;color:var(--muted);margin-left:6px}
+.inp{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.inp:focus{outline:none;border-color:var(--gold)}
+textarea.inp{resize:vertical;min-height:90px;line-height:1.6}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted)}
+.mode{display:inline-block;font-size:13px;padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.25);color:#fff}
+footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30px;font-family:'Jua',sans-serif}
+
+/* home */
+.hero{text-align:center;color:#fff;padding:30px 0 20px}
+.hero h1{font-size:clamp(34px,7vw,64px);margin:0;text-shadow:0 4px 0 rgba(0,0,0,.25)}
+.hero p{font-family:'Jua',sans-serif;font-size:19px;opacity:.9;margin:8px 0 0}
+.diamond{width:70px;height:70px;margin:0 auto 12px;border:5px solid var(--chalk);transform:rotate(45deg);border-radius:8px;position:relative;background:var(--dirt)}
+.diamond::after{content:'⚾';position:absolute;inset:0;display:grid;place-items:center;transform:rotate(-45deg);font-size:30px}
+.homegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;max-width:760px;margin:20px auto 0}
+.homegrid .card{text-align:center}
+.homegrid h2{margin:0 0 8px;font-size:26px}
+.homegrid p{margin:0 0 16px;color:var(--muted)}
+.narrow{max-width:620px;margin:0 auto}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{display:inline-flex;align-items:center;gap:4px;background:#fff3c4;border:2px solid #f0d77a;border-radius:99px;padding:5px 6px 5px 12px;font-weight:700}
+.chip button{border:0;background:rgba(0,0,0,.08);border-radius:50%;width:22px;height:22px;line-height:1;font-size:14px}
+.tchip{border:2px solid #f0d77a;background:#fff3c4;border-radius:99px;padding:6px 12px;font-weight:700;font-size:14px}
+.tchip:hover{background:var(--gold)}
+
+/* board */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:#fff;margin-bottom:14px}
+.topbar h1{margin:0;font-size:clamp(26px,5vw,40px);text-shadow:0 3px 0 rgba(0,0,0,.25)}
+.who{font-family:'Jua',sans-serif;font-size:17px;opacity:.95}
+.who b{background:var(--gold);color:var(--ink);padding:2px 10px;border-radius:99px}
+.hint{background:rgba(0,0,0,.22);color:#fff;border-radius:14px;padding:12px 16px;font-family:'Jua',sans-serif;font-size:16px;margin-bottom:14px}
+.prog{height:12px;background:rgba(0,0,0,.25);border-radius:99px;overflow:hidden;margin:6px 0 16px}
+.prog i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .3s}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.tile{position:relative;border:0;border-radius:18px;background:var(--card);padding:14px 8px 12px;text-align:center;box-shadow:0 6px 0 rgba(0,0,0,.2);display:flex;flex-direction:column;align-items:center;gap:2px;min-height:132px}
+.tile:hover{transform:translateY(-2px)}
+.tile .num{font-family:'Black Han Sans',sans-serif;font-size:42px;line-height:1.1}
+.tile .nm{font-weight:700;font-size:15px;min-height:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile .sg{font-size:12px;color:var(--muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:16px}
+.tile .st{font-size:12px;font-weight:700;padding:2px 10px;border-radius:99px;background:#eee;color:#777;margin-top:4px}
+.tile.part .st{background:#ffe7c2;color:#a35a00}
+.tile.done{background:#eaf8ee}
+.tile.done .st{background:#2a9d55;color:#fff}
+.tile.mine{outline:5px solid var(--gold);outline-offset:-5px}
+.tile .me{position:absolute;top:8px;left:8px;background:var(--gold);font-weight:900;font-size:12px;padding:2px 8px;border-radius:99px}
+.tile .rc{position:absolute;top:8px;right:8px;font-size:12px;font-weight:700;background:#e8f0ff;color:var(--blue);padding:2px 8px;border-radius:99px}
+
+/* overlay / modal */
+.ov{position:fixed;inset:0;background:rgba(10,25,15,.6);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px;overflow-y:auto}
+.ov[hidden]{display:none}
+.modal{background:var(--card);border-radius:22px;width:100%;max-width:760px;padding:20px;box-shadow:0 10px 0 rgba(0,0,0,.25)}
+.mhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.mhead .title{font-size:26px}
+.mnum{background:var(--ink);color:#fff;border-radius:12px;padding:2px 12px;margin-right:6px}
+.x{border:0;background:#eee;border-radius:50%;width:40px;height:40px;font-size:20px;flex:none}
+.sec{border:2px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px;background:#fff}
+.sec h3{margin:0 0 10px;font-family:'Jua',sans-serif;font-weight:400;font-size:20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sec h3 small{font-family:'Noto Sans KR';font-size:13px;color:var(--muted)}
+.frame{position:relative;width:100%;aspect-ratio:16/9;background:#111;border-radius:12px;overflow:hidden}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.noframe{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#bbb;font-family:'Jua',sans-serif;font-size:18px;line-height:1.6}
+.songinfo{font-family:'Jua',sans-serif;font-size:19px;margin-top:10px}
+.songinfo span{color:var(--muted);font-size:15px;margin-right:6px}
+.lyrview{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:22px;line-height:1.6;background:#fffbea;border-radius:12px;padding:14px;min-height:60px}
+.lyrview.empty{color:#aaa;font-size:17px}
+.cnt{font-size:13px;color:var(--muted)}
+.saved{font-size:14px;color:#2a9d55;font-weight:700}
+.rec{border-left:5px solid var(--blue);background:#f3f7ff;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.rec .rtext{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:18px}
+.rec .rmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:6px}
+.rec .rmeta button{border:0;border-radius:8px;padding:4px 10px;font-size:13px;font-weight:700;background:var(--blue);color:#fff}
+.rec .rmeta button.ghost{background:#e2e6ee;color:#555}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+
+/* big cheer mode */
+#bigView{background:#0e2416;align-items:stretch;padding:0}
+.bigin{width:100%;min-height:100%;display:flex;flex-direction:column;align-items:center;padding:20px 16px;color:#fff}
+.bigin .frame{max-width:520px}
+.bigname{font-family:'Black Han Sans',sans-serif;font-size:clamp(30px,6vw,56px);color:var(--gold);margin:14px 0 4px;text-align:center}
+.bigsong{font-family:'Jua',sans-serif;opacity:.75;margin-bottom:10px}
+.biglyr{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:clamp(28px,5vw,56px);line-height:1.5;text-align:center;max-width:1000px}
+.bigclose{position:fixed;top:14px;right:14px;z-index:5}
+
+/* share */
+.codebig{font-family:'Black Han Sans',sans-serif;font-size:64px;letter-spacing:10px;text-align:center;background:var(--ink);color:var(--gold);border-radius:16px;padding:8px 0;margin:8px 0}
+#qr{display:flex;justify-content:center;margin:14px 0}
+#qr img,#qr canvas{border:10px solid #fff;border-radius:8px}
+
+/* all view */
+.allitem{border-bottom:2px dashed var(--line);padding:12px 0;break-inside:avoid}
+.allitem h4{margin:0 0 4px;font-family:'Jua',sans-serif;font-weight:400;font-size:20px}
+.allitem .s{font-size:14px;color:var(--muted)}
+.allitem .l{white-space:pre-wrap;font-family:'Jua',sans-serif;font-size:17px;margin-top:6px}
+
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:14px;font-family:'Jua',sans-serif;font-size:17px;z-index:200;max-width:90vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.on{opacity:1}
+#toast.bad{background:var(--red)}
+
+@media print{
+  body{background:#fff}
+  body>*:not(#allView){display:none!important}
+  #allView{position:static;background:#fff;padding:0;display:block!important}
+  #allView .modal{box-shadow:none;max-width:none;padding:0}
+  .noprint{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- 홈 -->
+  <section id="home" class="screen">
+    <div class="hero">
+      <div class="diamond"></div>
+      <h1>우리 반 발야구 응원가</h1>
+      <p>유튜브 노래에 내 응원 가사를 붙여 보자!</p>
+      <p style="margin-top:10px"><span class="mode" id="modeBadge"></span></p>
+    </div>
+    <div class="homegrid">
+      <div class="card">
+        <h2>🧢 학생</h2>
+        <p>선생님이 알려준 방 코드와<br>내 번호로 들어가요.</p>
+        <button class="btn gold" onclick="showJoin()">참여하기</button>
+      </div>
+      <div class="card">
+        <h2>📋 선생님</h2>
+        <p>반 인원과 추천 틀을 넣어<br>응원가 방을 만들어요.</p>
+        <div class="row" style="justify-content:center">
+          <button class="btn" onclick="showSetup()">새로 만들기</button>
+          <button class="btn ghost" onclick="show('reopen')">다시 열기</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 학생 참여 -->
+  <section id="join" class="screen" hidden>
+    <div class="card narrow" style="margin-top:40px">
+      <h2 style="margin:0 0 4px">🧢 응원가 방 들어가기</h2>
+      <div id="jCodeWrap">
+        <label class="f">방 코드</label>
+        <input id="jCode" class="inp" maxlength="4" placeholder="예: K7QM" style="text-transform:uppercase;font-size:24px;letter-spacing:6px;text-align:center">
+      </div>
+      <div id="jCodeFixed" class="muted" style="margin-top:8px" hidden></div>
+      <label class="f">내 번호</label>
+      <input id="jNum" class="inp" type="number" inputmode="numeric" min="1" max="40" placeholder="번호" style="font-size:40px;text-align:center;font-family:'Black Han Sans'">
+      <div class="row" style="margin-top:18px;justify-content:space-between">
+        <button class="btn ghost" onclick="goHome()">처음으로</button>
+        <button class="btn gold" onclick="doJoin()">입장하기 ⚾</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 교사 다시 열기 -->
+  <section id="reopen" class="screen" hidden>
+    <div class="card narrow" style="margin-top:40px">
+      <h2 style="margin:0 0 4px">📋 우리 반 방 다시 열기</h2>
+      <label class="f">방 코드</label>
+      <input id="rCode" class="inp" maxlength="4" style="text-transform:uppercase;letter-spacing:4px">
+      <label class="f">선생님 비밀번호 (숫자 4자리)</label>
+      <input id="rPin" class="inp" type="password" inputmode="numeric" maxlength="4">
+      <div class="row" style="margin-top:18px;justify-content:space-between">
+        <button class="btn ghost" onclick="goHome()">처음으로</button>
+        <button class="btn" onclick="doReopen()">열기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 교사 만들기 -->
+  <section id="setup" class="screen" hidden>
+    <div class="card narrow" style="margin-top:20px">
+      <h2 style="margin:0">📋 응원가 방 만들기</h2>
+      <div class="grid2">
+        <div><label class="f">방 이름</label><input id="sClass" class="inp" placeholder="예: 5학년 3반 발야구"></div>
+        <div><label class="f">반 부르는 이름 <small>'O반' 자리에 들어가요</small></label><input id="sShort" class="inp" placeholder="예: 3반"></div>
+      </div>
+      <div class="grid2">
+        <div><label class="f">반 인원</label><input id="sCount" class="inp" type="number" min="1" max="40" value="24"></div>
+        <div><label class="f">선생님 비밀번호 <small>숫자 4자리</small></label><input id="sPin" class="inp" type="password" inputmode="numeric" maxlength="4"></div>
+      </div>
+      <label class="f">학생 이름 <small>선택 · 한 줄에 한 명, 1번부터 (비우면 학생이 직접 입력)</small></label>
+      <textarea id="sNames" class="inp" placeholder="김민수&#10;이서연&#10;..."></textarea>
+      <label class="f">추천 틀 <small>OO → 선수 이름, O반 → 반 이름으로 바뀌어요</small></label>
+      <div id="sTpl"></div>
+      <label class="f">추가 금지어 <small>쉼표로 구분 (기본 욕설·유행어는 이미 막혀 있어요)</small></label>
+      <input id="sBan" class="inp" placeholder="예: 상대팀 이름, 별명 등">
+      <div class="row" style="margin-top:20px;justify-content:space-between">
+        <button class="btn ghost" onclick="goHome()">취소</button>
+        <button class="btn gold" onclick="createRoom()">방 만들기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 게시판 -->
+  <section id="board" class="screen" hidden>
+    <div class="topbar">
+      <div>
+        <h1 id="bTitle"></h1>
+        <div class="who" id="bWho"></div>
+      </div>
+      <div class="row" id="bBtns"></div>
+    </div>
+    <div class="hint" id="bHint"></div>
+    <div class="who" style="color:#fff" id="bProgText"></div>
+    <div class="prog"><i id="bProg"></i></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <footer>made by m00n</footer>
+</div>
+
+<!-- 응원가 창 -->
+<div class="ov" id="songModal" hidden>
+  <div class="modal">
+    <div class="mhead">
+      <div class="title"><span class="mnum" id="mNum"></span><span id="mTitle"></span></div>
+      <button class="x" onclick="closeSong()">✕</button>
+    </div>
+    <div id="mBody"></div>
+  </div>
+</div>
+
+<!-- 응원 모드 -->
+<div class="ov" id="bigView" hidden>
+  <button class="btn gold bigclose" onclick="closeBig()">닫기 ✕</button>
+  <div class="bigin">
+    <div class="frame" id="bigFrame"></div>
+    <div class="bigname" id="bigName"></div>
+    <div class="bigsong" id="bigSong"></div>
+    <div class="biglyr" id="bigLyr"></div>
+  </div>
+</div>
+
+<!-- 참여 안내 -->
+<div class="ov" id="shareView" hidden>
+  <div class="modal" style="max-width:480px;text-align:center">
+    <div class="mhead"><div class="title">참여 안내</div><button class="x" onclick="$('#shareView').hidden=true">✕</button></div>
+    <div class="muted">방 코드</div>
+    <div class="codebig" id="shCode"></div>
+    <div id="qr"></div>
+    <div class="row" style="justify-content:center">
+      <input id="shLink" class="inp" readonly style="font-size:13px;flex:1;min-width:0">
+      <button class="btn sm" onclick="copyLink()">링크 복사</button>
+    </div>
+    <p class="muted" style="font-size:14px">QR이나 링크로 들어오면 번호만 입력하면 돼요.</p>
+  </div>
+</div>
+
+<!-- 선생님 설정 -->
+<div class="ov" id="setView" hidden>
+  <div class="modal">
+    <div class="mhead"><div class="title">⚙️ 설정</div><button class="x" onclick="$('#setView').hidden=true">✕</button></div>
+    <div class="grid2">
+      <div><label class="f">방 이름</label><input id="eClass" class="inp"></div>
+      <div><label class="f">반 부르는 이름</label><input id="eShort" class="inp"></div>
+    </div>
+    <label class="f">반 인원</label><input id="eCount" class="inp" type="number" min="1" max="40">
+    <label class="f">학생 이름 <small>한 줄에 한 명, 1번부터</small></label>
+    <textarea id="eNames" class="inp"></textarea>
+    <label class="f">추천 틀</label><div id="eTpl"></div>
+    <label class="f">추가 금지어 <small>쉼표로 구분</small></label><input id="eBan" class="inp">
+    <label class="f" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="eLock" style="width:20px;height:20px"> 잠그기 (학생들이 더 이상 고치거나 추천할 수 없어요)</label>
+    <div class="row" style="margin-top:16px;justify-content:flex-end">
+      <button class="btn gold" onclick="saveSettings()">저장</button>
+    </div>
+    <div class="sec" style="margin:20px 0 0;border-color:#f3c3bf;background:#fff6f5">
+      <h3 style="color:var(--red)">🗑 방 삭제</h3>
+      <p class="muted" style="margin:0 0 10px;font-size:14px">이 방의 모든 응원가·가사·추천이 영원히 지워지고 되돌릴 수 없어요. 들어와 있는 학생들도 처음 화면으로 나가요.</p>
+      <div class="row" style="justify-content:flex-end"><button class="btn red sm" onclick="deleteRoom()">방 삭제하기</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- 모아 보기 -->
+<div class="ov" id="allView" hidden>
+  <div class="modal">
+    <div class="mhead">
+      <div class="title" id="allTitle">응원가 모아 보기</div>
+      <div class="row noprint"><button class="btn sm" onclick="window.print()">🖨 인쇄</button><button class="x" onclick="$('#allView').hidden=true">✕</button></div>
+    </div>
+    <div id="allList"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+/* ============================================================
+   Firebase 설정 — 본인 프로젝트 값으로 바꿔 넣으세요.
+   비워 두면 "로컬 모드"(이 기기에서만 저장)로 동작합니다.
+   데이터 경로: cheerRooms/{방코드}
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyD9RHJ2uVPr3sCMMfI04WPK977XjyCe8QY",
+  authDomain: "balyagu-c56a5.firebaseapp.com",
+  databaseURL: "https://balyagu-c56a5-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "balyagu-c56a5",
+  storageBucket: "balyagu-c56a5.firebasestorage.app",
+  messagingSenderId: "882298047722",
+  appId: "1:882298047722:web:da92999692f0adca129b93"
+};
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------------- 저장소 (Firebase / 로컬) ---------------- */
+let db = null;
+const ONLINE = !!(firebaseConfig.apiKey && firebaseConfig.databaseURL && typeof firebase !== 'undefined');
+if (ONLINE) { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
+
+const LS = 'm00n_cheer_rooms_v1';
+const localSubs = {};
+function lsAll(){ try { return JSON.parse(localStorage.getItem(LS)) || {}; } catch(e){ return {}; } }
+function lsSave(all){ try { localStorage.setItem(LS, JSON.stringify(all)); } catch(e){} }
+function lsNotify(code){ const r = lsAll()[code] || null; (localSubs[code] || []).forEach(f => f(r)); }
+window.addEventListener('storage', e => { if (e.key === LS) Object.keys(localSubs).forEach(lsNotify); });
+function lsWrite(code, path, val){
+  const all = lsAll(); all[code] = all[code] || {}; let o = all[code];
+  for (let i = 0; i < path.length - 1; i++){ o[path[i]] = o[path[i]] || {}; o = o[path[i]]; }
+  const k = path[path.length - 1];
+  if (val === null || val === undefined) delete o[k]; else o[k] = val;
+  lsSave(all);
+}
+const refOf = (code, path) => db.ref(['cheerRooms', code, ...path].join('/'));
+const Store = {
+  async get(code){ if (db){ const s = await db.ref('cheerRooms/' + code).get(); return s.val(); } return lsAll()[code] || null; },
+  async set(code, path, val){ if (db) return refOf(code, path).set(val); lsWrite(code, path, val); lsNotify(code); },
+  async update(code, path, obj){ if (db) return refOf(code, path).update(obj); for (const k in obj) lsWrite(code, [...path, k], obj[k]); lsNotify(code); },
+  async remove(code){ if (db) return db.ref('cheerRooms/' + code).remove(); const all = lsAll(); delete all[code]; lsSave(all); lsNotify(code); },
+  async push(code, path, val){ const id = db ? db.ref().push().key : Date.now().toString(36) + Math.random().toString(36).slice(2, 6); return Store.set(code, [...path, id], val); },
+  watch(code, cb){
+    if (db){ const r = db.ref('cheerRooms/' + code); const h = s => cb(s.val()); r.on('value', h); return () => r.off('value', h); }
+    (localSubs[code] = localSubs[code] || []).push(cb); cb(lsAll()[code] || null);
+    return () => { localSubs[code] = (localSubs[code] || []).filter(f => f !== cb); };
+  }
+};
+
+/* ---------------- 금지어 필터 ---------------- */
+const BANNED = {
+  '욕설·비속어': ['씨발','시발','씨팔','시팔','씨바','시바','씹','ㅅㅂ','ㅆㅂ','ㅅㅃ','병신','븅신','빙신','ㅂㅅ','ㅄ','개새','개색','개세','새끼','섀끼','색기','존나','졸라','ㅈㄴ','좆','좇','지랄','ㅈㄹ','염병','닥쳐','닥치','꺼져','꺼지라','뒤져','뒤질','죽어라','죽을래','미친','미쳤냐','ㅁㅊ','애미','애비','느금','니엄마','니애미','엠창','썅','쌍년','찐따','등신','멍청이','바보','저능','장애','fuck','shit','bitch','ㅗ'],
+  '유행어': ['킹받','어쩔티비','저쩔티비','어쩔','저쩔','안물안궁','안물','레게노','오진다','오지네','오지고','지린다','지리네','지렸','쩐다','쩔어','쩔지','개웃','개쩔','개꿀','개좋','개잘','개쎄','꿀잼','노잼','핵잼','킹정','억까','갑분싸','국룰','중꺾마','럭키비키','원영적','폼미쳤','너t야','마라탕후루','탕탕후루','스키비디','알잘딱','무야호','ㄹㅇ','ㅇㅈ','ㄱㅇㄷ','ㅋㅋ','ㅎㅎ','ㅠㅠ','ㄷㄷ']
+};
+const norm = s => String(s || '').toLowerCase().replace(/[^a-z가-힣ㄱ-ㅎㅏ-ㅣ]/g, '');
+function checkText(text){
+  const t = norm(text); if (!t) return null;
+  const extra = ((S.room && S.room.meta && S.room.meta.banned) || []).filter(Boolean);
+  for (const w of extra){ const n = norm(w); if (n && t.includes(n)) return { cat: '선생님이 정한 금지어', word: w }; }
+  for (const cat in BANNED) for (const w of BANNED[cat]){ const n = norm(w); if (n && t.includes(n)) return { cat, word: w }; }
+  return null;
+}
+function badMsg(b){
+  if (b.cat === '욕설·비속어') return '욕설이나 나쁜 말은 쓸 수 없어요. 다른 말로 바꿔 주세요!';
+  return `'${b.word}' 같은 ${b.cat}는 쓸 수 없어요. 다른 말로 바꿔 주세요!`;
+}
+
+/* ---------------- 유튜브 ---------------- */
+function ytId(u){
+  if (!u) return null; u = String(u).trim();
+  const m = u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/|v\/))([\w-]{11})/);
+  if (m) return m[1];
+  return /^[\w-]{11}$/.test(u) ? u : null;
+}
+function ytStart(u){
+  const m = String(u || '').match(/[?&](?:t|start)=([0-9hms]+)/); if (!m) return 0;
+  const v = m[1]; if (/^\d+$/.test(v)) return +v;
+  const h = +(v.match(/(\d+)h/) || [0,0])[1], mi = +(v.match(/(\d+)m/) || [0,0])[1], s = +(v.match(/(\d+)s/) || [0,0])[1];
+  return h * 3600 + mi * 60 + s;
+}
+const ytEmbed = (id, st) => `<iframe src="https://www.youtube-nocookie.com/embed/${id}?start=${st || 0}&rel=0&playsinline=1" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+
+/* ---------------- 상태 ---------------- */
+const S = { code: null, role: null, me: null, room: null, unwatch: null, openN: null };
+const DEFAULT_TPL = ['최강OO','무적OO','O반','안타','홈런','날려라 OO','달려라 OO','가자 가자 O반','승리의 O반','파이팅'];
+const song = n => ((S.room && S.room.songs) || {})['n' + n] || {};
+const recsOf = n => ((S.room && S.room.recs) || {})['n' + n] || {};
+function playerName(n){ const s = song(n); return (s.name || ((S.room.meta.names || [])[n - 1]) || '').trim(); }
+function fill(t, n){
+  const nm = playerName(n), sh = (S.room.meta.short || '').trim();
+  let r = t; if (nm) r = r.replace(/OO|○○|ㅇㅇ/g, nm); if (sh) r = r.replace(/O반|○반/g, sh); return r;
+}
+function hash(s){ let x = 5381; for (const c of s) x = ((x << 5) + x + c.charCodeAt(0)) | 0; return (x >>> 0).toString(36); }
+
+let toastT;
+function toast(msg, bad){ const t = $('#toast'); t.textContent = msg; t.className = 'on' + (bad ? ' bad' : ''); clearTimeout(toastT); toastT = setTimeout(() => t.className = '', 2600); }
+function show(id){ document.querySelectorAll('.screen').forEach(e => e.hidden = e.id !== id); window.scrollTo(0, 0); }
+function saveSess(){ try { sessionStorage.setItem('m00n_cheer_sess', JSON.stringify({ code: S.code, role: S.role, me: S.me })); } catch(e){} }
+function loadSess(){ try { return JSON.parse(sessionStorage.getItem('m00n_cheer_sess')); } catch(e){ return null; } }
+function clearSess(){ try { sessionStorage.removeItem('m00n_cheer_sess'); } catch(e){} }
+
+/* ---------------- 칩 편집기 ---------------- */
+function chipEditor(el, items){
+  let list = [...items];
+  function draw(){
+    el.innerHTML = `<div class="chips">${list.map((t, i) => `<span class="chip">${esc(t)}<button type="button" data-i="${i}">×</button></span>`).join('')}</div>
+      <div class="row"><input class="inp" style="flex:1;min-width:0" placeholder="추천 틀 추가 (예: 무적OO)"><button type="button" class="btn sm">추가</button></div>`;
+    el.querySelectorAll('.chip button').forEach(b => b.onclick = () => { list.splice(+b.dataset.i, 1); draw(); });
+    const inp = el.querySelector('input');
+    const add = () => { const v = inp.value.trim(); if (!v) return; const b = checkText(v); if (b){ toast(badMsg(b), true); return; }
+      if (!list.includes(v)) list.push(v); draw(); el.querySelector('input').focus(); };
+    el.querySelector('.row button').onclick = add;
+    inp.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); add(); } };
+  }
+  draw(); return { get: () => list.slice() };
+}
+
+/* ---------------- 화면 이동 ---------------- */
+let setupTpl;
+function goHome(){ if (S.unwatch) S.unwatch(); S.unwatch = null; S.code = S.role = S.me = S.room = null; clearSess(); history.replaceState(null, '', location.pathname); show('home'); }
+function showSetup(){ setupTpl = chipEditor($('#sTpl'), DEFAULT_TPL); show('setup'); }
+function showJoin(fixedCode){
+  $('#jCodeWrap').hidden = !!fixedCode; $('#jCodeFixed').hidden = !fixedCode;
+  if (fixedCode){ $('#jCode').value = fixedCode; $('#jCodeFixed').textContent = '방 코드: ' + fixedCode; }
+  $('#jNum').value = ''; show('join'); setTimeout(() => (fixedCode ? $('#jNum') : $('#jCode')).focus(), 50);
+}
+
+async function createRoom(){
+  const count = parseInt($('#sCount').value, 10), pin = $('#sPin').value.trim();
+  if (!(count >= 1 && count <= 40)) return toast('반 인원은 1~40명으로 넣어 주세요', true);
+  if (!/^\d{4}$/.test(pin)) return toast('선생님 비밀번호는 숫자 4자리로 넣어 주세요', true);
+  const names = $('#sNames').value.split('\n').map(s => s.trim()).slice(0, count);
+  while (names.length && !names[names.length - 1]) names.pop();
+  const ABC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; let code = '';
+  for (let i = 0; i < 20; i++){
+    code = Array.from({ length: 4 }, () => ABC[Math.floor(Math.random() * ABC.length)]).join('');
+    if (!(await Store.get(code))) break;
+  }
+  const meta = {
+    className: $('#sClass').value.trim() || '우리 반 발야구 응원가', short: $('#sShort').value.trim(), count, names,
+    templates: setupTpl.get(), banned: $('#sBan').value.split(',').map(s => s.trim()).filter(Boolean),
+    pin: hash(pin), locked: false, createdAt: Date.now()
+  };
+  try { await Store.set(code, ['meta'], meta); } catch(e){ return toast('저장하지 못했어요. Firebase 설정을 확인해 주세요.', true); }
+  if (await enterRoom(code, 'teacher', null)) openShare();
+}
+
+async function doReopen(){
+  const code = $('#rCode').value.trim().toUpperCase(), pin = $('#rPin').value.trim();
+  const r = await Store.get(code);
+  if (!r || !r.meta) return toast('방을 찾을 수 없어요', true);
+  if (r.meta.pin !== hash(pin)) return toast('비밀번호가 달라요', true);
+  enterRoom(code, 'teacher', null);
+}
+
+async function doJoin(){
+  const code = $('#jCode').value.trim().toUpperCase(), n = parseInt($('#jNum').value, 10);
+  if (!code) return toast('방 코드를 넣어 주세요', true);
+  const r = await Store.get(code);
+  if (!r || !r.meta) return toast('방을 찾을 수 없어요. 코드를 확인해 주세요', true);
+  if (!(n >= 1 && n <= r.meta.count)) return toast(`번호는 1번부터 ${r.meta.count}번까지예요`, true);
+  enterRoom(code, 'student', n);
+}
+
+async function enterRoom(code, role, me){
+  const r = await Store.get(code);
+  if (!r || !r.meta){ toast('방을 찾을 수 없어요', true); clearSess(); show('home'); return false; }
+  if (S.unwatch) S.unwatch();
+  Object.assign(S, { code, role, me, room: r }); saveSess();
+  history.replaceState(null, '', location.pathname + '?room=' + code);
+  S.unwatch = Store.watch(code, room => {
+    if (!room || !room.meta){
+      if (S.code === code){ closeAllOverlays(); goHome(); toast('이 방은 삭제되었어요', true); }
+      return;
+    }
+    S.room = room; renderBoard(); if (S.openN) updateModal();
+  });
+  show('board'); renderBoard(); return true;
+}
+
+/* ---------------- 게시판 ---------------- */
+function renderBoard(){
+  const r = S.room; if (!r || !r.meta) return; const m = r.meta;
+  $('#bTitle').textContent = m.className;
+  $('#bWho').innerHTML = S.role === 'teacher'
+    ? `<b>선생님</b> · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`
+    : `<b>${S.me}번</b> 으로 들어왔어요 · 방 코드 ${S.code}${m.locked ? ' · 🔒 잠김' : ''}`;
+  $('#bBtns').innerHTML = (S.role === 'teacher'
+    ? `<button class="btn chalk sm" onclick="openShare()">📱 참여 안내</button><button class="btn chalk sm" onclick="openSettings()">⚙️ 설정</button>` : '')
+    + `<button class="btn chalk sm" onclick="openAll()">📜 모아 보기</button><button class="btn chalk sm" onclick="goHome()">나가기</button>`;
+  $('#bHint').textContent = S.role === 'teacher'
+    ? '번호를 누르면 학생의 응원가를 보고 고칠 수 있어요. 문제가 있는 추천은 지울 수 있어요.'
+    : (m.locked ? '선생님이 잠가 두었어요. 응원가를 볼 수만 있어요.' : '노란 칸(내 번호)을 눌러 응원가를 만들고, 친구 번호를 눌러 가사를 추천해 보세요!');
+  let html = '', done = 0;
+  for (let n = 1; n <= m.count; n++){
+    const s = song(n), rc = Object.keys(recsOf(n)).length;
+    const isDone = ytId(s.url) && (s.lyrics || '').trim(), part = !isDone && (s.url || s.lyrics || s.title);
+    if (isDone) done++;
+    html += `<button class="tile ${isDone ? 'done' : part ? 'part' : ''} ${S.me === n ? 'mine' : ''}" data-n="${n}">
+      ${S.me === n ? '<span class="me">나</span>' : ''}${rc ? `<span class="rc">💬 ${rc}</span>` : ''}
+      <span class="num">${n}</span><span class="nm">${esc(playerName(n)) || '&nbsp;'}</span>
+      <span class="sg">${s.title ? '♪ ' + esc(s.title) : ''}</span>
+      <span class="st">${isDone ? '완성' : part ? '만드는 중' : '아직'}</span></button>`;
+  }
+  $('#grid').innerHTML = html;
+  $('#grid').querySelectorAll('.tile').forEach(t => t.onclick = () => openSong(+t.dataset.n));
+  $('#bProgText').textContent = `완성한 응원가 ${done} / ${m.count}`;
+  $('#bProg').style.width = (m.count ? done / m.count * 100 : 0) + '%';
+}
+
+/* ---------------- 응원가 창 ---------------- */
+let M = {};
+const canEditN = n => S.role === 'teacher' || (S.me === n && !S.room.meta.locked);
+function openSong(n){
+  S.openN = n; M = { built: null, dirtyInfo: false, dirtyLyr: false, frameKey: '' };
+  buildModal(); $('#songModal').hidden = false;
+}
+function closeSong(){ S.openN = null; $('#songModal').hidden = true; $('#mBody').innerHTML = ''; }
+
+function chipsHTML(n){ return (S.room.meta.templates || []).map(t => `<button type="button" class="tchip" data-t="${esc(t)}">${esc(fill(t, n))}</button>`).join(''); }
+function insertAt(ta, text){
+  const st = ta.selectionStart ?? ta.value.length, en = ta.selectionEnd ?? ta.value.length, v = ta.value;
+  const pre = v.slice(0, st), sep = pre && !/[\s]$/.test(pre) ? ' ' : '';
+  ta.value = pre + sep + text + v.slice(en); const p = (pre + sep + text).length;
+  ta.focus(); ta.setSelectionRange(p, p); ta.dispatchEvent(new Event('input'));
+}
+
+function buildModal(){
+  const n = S.openN, m = S.room.meta, ce = canEditN(n), owner = S.me === n;
+  M.built = ce;
+  $('#mNum').textContent = n + '번';
+  const canRec = S.role === 'student' && !owner && !m.locked;
+  $('#mBody').innerHTML = `
+    <div class="sec">
+      <h3>🎵 노래</h3>
+      <div class="frame" id="mFrame"></div>
+      ${ce ? `
+        <div class="grid2" style="margin-top:10px">
+          <div><label class="f" style="margin-top:0">선수 이름</label><input id="mName" class="inp info" maxlength="10" placeholder="응원가에 들어갈 이름"></div>
+          <div><label class="f" style="margin-top:0">원곡 제목</label><input id="mSong" class="inp info" maxlength="40" placeholder="예: 원곡 노래 제목 - 가수"></div>
+        </div>
+        <label class="f">유튜브 링크</label>
+        <div class="row">
+          <input id="mUrl" class="inp info" style="flex:3;min-width:180px" placeholder="https://youtu.be/...">
+          <input id="mStart" class="inp info" type="number" min="0" style="flex:1;min-width:90px" placeholder="시작(초)">
+        </div>
+        <div class="row" style="margin-top:8px;justify-content:flex-end"><span class="saved" id="mInfoSaved"></span><button class="btn sm" id="mInfoBtn">노래 정보 저장</button></div>
+      ` : `<div class="songinfo" id="mInfoView"></div>`}
+    </div>
+    <div class="sec">
+      <h3>✏️ 응원 가사 <button class="btn gold sm" id="mBig" style="margin-left:auto">📣 응원 모드</button></h3>
+      ${ce ? `
+        <div class="muted" style="font-size:13px">추천 틀을 누르면 가사에 들어가요</div>
+        <div class="chips">${chipsHTML(n)}</div>
+        <textarea id="mLyr" class="inp" style="min-height:160px;font-family:'Jua';font-size:19px" placeholder="노래에 맞춰 응원 가사를 적어 보세요"></textarea>
+        <div class="row" style="justify-content:space-between;margin-top:8px">
+          <span class="cnt" id="mCnt"></span>
+          <span class="row"><span class="saved" id="mLyrSaved"></span><button class="btn gold" id="mLyrBtn">가사 저장</button></span>
+        </div>` : `<div class="lyrview" id="mLyrView"></div>`}
+    </div>
+    <div class="sec">
+      <h3>💬 친구 추천 가사 <small>${owner ? '마음에 드는 추천을 가사에 넣어 보세요' : canRec ? '친구에게 어울리는 가사를 추천해 주세요 (한 친구에게 3개까지)' : ''}</small></h3>
+      <div id="mRecs"></div>
+      ${canRec ? `
+        <div class="chips">${chipsHTML(n)}</div>
+        <div class="row"><input id="mRecIn" class="inp" style="flex:1;min-width:0" maxlength="80" placeholder="추천 가사 한 줄"><button class="btn" id="mRecBtn">추천하기</button></div>` : ''}
+    </div>
+    ${S.role === 'teacher' ? `<div class="row" style="justify-content:flex-end"><button class="btn red sm" id="mClear">이 응원가 비우기</button></div>` : ''}`;
+
+  if (ce){
+    document.querySelectorAll('#mBody .info').forEach(i => i.oninput = () => { M.dirtyInfo = true; $('#mInfoSaved').textContent = ''; });
+    $('#mUrl').addEventListener('change', () => { const st = ytStart($('#mUrl').value); if (st && !$('#mStart').value) $('#mStart').value = st; });
+    $('#mInfoBtn').onclick = saveInfo;
+    const ta = $('#mLyr');
+    ta.oninput = () => { M.dirtyLyr = true; $('#mLyrSaved').textContent = ''; updateCount(); };
+    $('#mLyrBtn').onclick = saveLyrics;
+    $('#mBody').querySelectorAll('.sec:nth-child(2) .tchip').forEach(b => b.onclick = () => insertAt(ta, fill(b.dataset.t, n)));
+  }
+  if (canRec){
+    const ri = $('#mRecIn');
+    $('#mBody').querySelectorAll('.sec:nth-child(3) .tchip').forEach(b => b.onclick = () => { ri.value = (ri.value ? ri.value.replace(/\s*$/, ' ') : '') + fill(b.dataset.t, n); ri.focus(); });
+    $('#mRecBtn').onclick = sendRec;
+    ri.onkeydown = e => { if (e.key === 'Enter'){ e.preventDefault(); sendRec(); } };
+  }
+  $('#mBig').onclick = openBig;
+  if ($('#mClear')) $('#mClear').onclick = async () => {
+    if (!confirm(n + '번 응원가(노래·가사·추천)를 모두 지울까요?')) return;
+    await Store.set(S.code, ['songs', 'n' + n], null); await Store.set(S.code, ['recs', 'n' + n], null);
+    M.dirtyInfo = M.dirtyLyr = false; toast('지웠어요');
+  };
+  updateModal();
+}
+
+function updateCount(){ const ta = $('#mLyr'); if (ta) $('#mCnt').textContent = ta.value.length + ' / 600자'; }
+
+function updateModal(){
+  const n = S.openN; if (!n || !S.room) return;
+  if (canEditN(n) !== M.built) return buildModal();
+  const s = song(n), nm = playerName(n);
+  $('#mTitle').textContent = (nm ? nm + ' ' : '') + '응원가';
+  const id = ytId(s.url), key = id ? id + '@' + (s.start || 0) : '';
+  if (key !== M.frameKey || !$('#mFrame').innerHTML){
+    M.frameKey = key;
+    $('#mFrame').innerHTML = id ? ytEmbed(id, s.start) : `<div class="noframe">🎵<br>${M.built ? '아래에 유튜브 링크를 넣어 주세요' : '아직 노래가 없어요'}</div>`;
+  }
+  if (M.built){
+    if (!M.dirtyInfo){ $('#mName').value = nm; $('#mSong').value = s.title || ''; $('#mUrl').value = s.url || ''; $('#mStart').value = s.start || ''; }
+    if (!M.dirtyLyr) $('#mLyr').value = s.lyrics || '';
+    updateCount();
+  } else {
+    $('#mInfoView').innerHTML = `<div><span>선수</span>${esc(nm) || '-'}</div><div><span>원곡</span>${esc(s.title) || '-'}</div>`;
+    const v = $('#mLyrView'); v.textContent = s.lyrics || '아직 가사가 없어요.'; v.classList.toggle('empty', !s.lyrics);
+  }
+  renderRecs();
+}
+
+function renderRecs(){
+  const n = S.openN, list = Object.entries(recsOf(n)).sort((a, b) => (a[1].at || 0) - (b[1].at || 0));
+  const canUse = canEditN(n);
+  $('#mRecs').innerHTML = list.length ? list.map(([id, r]) => {
+    const canDel = S.role === 'teacher' || S.me === n || (S.me && r.from === S.me);
+    return `<div class="rec"><div class="rtext">${esc(r.text)}</div><div class="rmeta">${r.from}번 친구의 추천
+      ${canUse ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
+  }).join('') : '<p class="muted" style="margin:0 0 8px">아직 추천이 없어요.</p>';
+  $('#mRecs').querySelectorAll('[data-use]').forEach(b => b.onclick = () => {
+    const r = recsOf(n)[b.dataset.use]; const ta = $('#mLyr'); if (!r || !ta) return;
+    ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, '') + '\n' + r.text : r.text;
+    ta.dispatchEvent(new Event('input')); toast('가사에 넣었어요. "가사 저장"을 눌러 주세요!');
+  });
+  $('#mRecs').querySelectorAll('[data-del]').forEach(b => b.onclick = () => Store.set(S.code, ['recs', 'n' + n, b.dataset.del], null));
+}
+
+async function saveInfo(){
+  const n = S.openN, name = $('#mName').value.trim(), title = $('#mSong').value.trim(), url = $('#mUrl').value.trim();
+  if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
+  for (const t of [name, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
+  const start = Math.max(0, parseInt($('#mStart').value, 10) || ytStart(url) || 0);
+  try {
+    await Store.update(S.code, ['songs', 'n' + n], { name: name.slice(0, 10), title: title.slice(0, 40), url, start, updatedAt: Date.now() });
+    M.dirtyInfo = false; $('#mInfoSaved').textContent = '저장했어요 ✓'; updateModal();
+  } catch(e){ toast('저장하지 못했어요', true); }
+}
+
+async function saveLyrics(){
+  const n = S.openN, ly = $('#mLyr').value.replace(/\s+$/, '');
+  if (ly.length > 600) return toast('가사는 600자까지 쓸 수 있어요', true);
+  const b = checkText(ly); if (b) return toast(badMsg(b), true);
+  if (M.dirtyInfo) await saveInfo();
+  try {
+    await Store.update(S.code, ['songs', 'n' + n], { lyrics: ly, updatedAt: Date.now() });
+    M.dirtyLyr = false; $('#mLyrSaved').textContent = '저장했어요 ✓';
+  } catch(e){ toast('저장하지 못했어요', true); }
+}
+
+async function sendRec(){
+  const n = S.openN, ri = $('#mRecIn'), text = ri.value.trim();
+  if (!text) return;
+  if (text.length > 80) return toast('추천은 80자까지 쓸 수 있어요', true);
+  const b = checkText(text); if (b) return toast(badMsg(b), true);
+  const mine = Object.values(recsOf(n)).filter(r => r.from === S.me).length;
+  if (mine >= 3) return toast('한 친구에게는 3개까지 추천할 수 있어요. 지우고 다시 써 보세요', true);
+  try { await Store.push(S.code, ['recs', 'n' + n], { from: S.me, text, at: Date.now() }); ri.value = ''; toast('추천했어요! 👍'); }
+  catch(e){ toast('추천하지 못했어요', true); }
+}
+
+/* ---------------- 응원 모드 ---------------- */
+function openBig(){
+  const n = S.openN, s = song(n), id = ytId(s.url);
+  const ly = ($('#mLyr') ? $('#mLyr').value : s.lyrics) || '';
+  $('#bigFrame').innerHTML = id ? ytEmbed(id, s.start) : '<div class="noframe">🎵 노래 없음</div>';
+  $('#bigName').textContent = `${n}번 ${playerName(n)}`.trim();
+  $('#bigSong').textContent = s.title ? '♪ ' + s.title : '';
+  $('#bigLyr').textContent = ly || '아직 가사가 없어요.';
+  $('#mFrame').innerHTML = ''; M.frameKey = '';   // 소리 겹침 방지
+  $('#bigView').hidden = false;
+}
+function closeBig(){ $('#bigView').hidden = true; $('#bigFrame').innerHTML = ''; updateModal(); }
+
+/* ---------------- 선생님 도구 ---------------- */
+function joinLink(){ return location.origin + location.pathname + '?room=' + S.code; }
+function openShare(){
+  $('#shCode').textContent = S.code; $('#shLink').value = joinLink(); $('#qr').innerHTML = '';
+  if (typeof QRCode !== 'undefined') new QRCode($('#qr'), { text: joinLink(), width: 200, height: 200 });
+  $('#shareView').hidden = false;
+}
+function copyLink(){ const i = $('#shLink'); i.select(); (navigator.clipboard ? navigator.clipboard.writeText(i.value) : Promise.reject()).then(() => toast('링크를 복사했어요'), () => { document.execCommand('copy'); toast('링크를 복사했어요'); }); }
+
+let setTpl;
+function openSettings(){
+  const m = S.room.meta;
+  $('#eClass').value = m.className || ''; $('#eShort').value = m.short || ''; $('#eCount').value = m.count;
+  $('#eNames').value = (m.names || []).join('\n'); $('#eBan').value = (m.banned || []).join(', '); $('#eLock').checked = !!m.locked;
+  setTpl = chipEditor($('#eTpl'), m.templates || []);
+  $('#setView').hidden = false;
+}
+async function saveSettings(){
+  const count = parseInt($('#eCount').value, 10);
+  if (!(count >= 1 && count <= 40)) return toast('반 인원은 1~40명이에요', true);
+  const names = $('#eNames').value.split('\n').map(s => s.trim()).slice(0, count);
+  while (names.length && !names[names.length - 1]) names.pop();
+  await Store.update(S.code, ['meta'], {
+    className: $('#eClass').value.trim() || '우리 반 발야구 응원가', short: $('#eShort').value.trim(), count, names,
+    templates: setTpl.get(), banned: $('#eBan').value.split(',').map(s => s.trim()).filter(Boolean), locked: $('#eLock').checked
+  });
+  $('#setView').hidden = true; toast('설정을 저장했어요');
+}
+
+function closeAllOverlays(){
+  ['#songModal', '#bigView', '#shareView', '#setView', '#allView'].forEach(id => $(id).hidden = true);
+  $('#bigFrame').innerHTML = ''; $('#mBody').innerHTML = ''; S.openN = null;
+}
+async function deleteRoom(){
+  const m = S.room.meta;
+  const pin = prompt(`'${m.className}' 방을 삭제하려면 선생님 비밀번호 4자리를 입력하세요.\n삭제하면 되돌릴 수 없어요.`);
+  if (pin === null) return;
+  if (hash(pin.trim()) !== m.pin) return toast('비밀번호가 달라요', true);
+  if (!confirm(`정말 삭제할까요?\n방 코드 ${S.code}의 응원가가 모두 사라져요.`)) return;
+  const code = S.code;
+  try {
+    if (S.unwatch) S.unwatch(); S.unwatch = null;
+    await Store.remove(code);
+    closeAllOverlays(); goHome(); toast('방을 삭제했어요');
+  } catch(e){
+    toast('삭제하지 못했어요. Firebase 규칙을 확인해 주세요', true);
+    S.unwatch = Store.watch(code, room => { if (room && room.meta){ S.room = room; renderBoard(); } });
+  }
+}
+
+function openAll(){
+  const m = S.room.meta; let h = '';
+  for (let n = 1; n <= m.count; n++){
+    const s = song(n); if (!s.lyrics && !s.url && !s.title) continue;
+    h += `<div class="allitem"><h4>${n}번 ${esc(playerName(n))}</h4>
+      <div class="s">${s.title ? '♪ ' + esc(s.title) : ''}${s.url ? ` · <a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>${s.start ? ' (' + s.start + '초부터)' : ''}` : ''}</div>
+      <div class="l">${esc(s.lyrics || '')}</div></div>`;
+  }
+  $('#allTitle').textContent = m.className + ' 응원가';
+  $('#allList').innerHTML = h || '<p class="muted">아직 만든 응원가가 없어요.</p>';
+  $('#allView').hidden = false;
+}
+
+/* ---------------- 시작 ---------------- */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!$('#bigView').hidden) return closeBig();
+  for (const id of ['#allView', '#setView', '#shareView']) if (!$(id).hidden){ $(id).hidden = true; return; }
+  if (!$('#songModal').hidden) closeSong();
+});
+['#jCode', '#jNum'].forEach(s => $(s).addEventListener('keydown', e => { if (e.key === 'Enter') doJoin(); }));
+$('#rPin').addEventListener('keydown', e => { if (e.key === 'Enter') doReopen(); });
+$('#modeBadge').textContent = ONLINE ? '🟢 온라인 모드' : '💻 로컬 모드 · 이 기기에서만 저장돼요';
+
+(function init(){
+  const urlRoom = (new URLSearchParams(location.search).get('room') || '').toUpperCase();
+  const sess = loadSess();
+  if (sess && sess.code && (!urlRoom || sess.code === urlRoom)) enterRoom(sess.code, sess.role, sess.me);
+  else if (urlRoom) showJoin(urlRoom);
+  else show('home');
+})();
+</script>
+</body>
+</html>

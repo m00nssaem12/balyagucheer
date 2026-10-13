@@ -887,7 +887,8 @@ function luRender(){
     const k = LU.indexOf(i), nm = playerName(i);
     boxes += `<button type="button" class="lubox ${k >= 0 ? 'on' : ''}" data-lu="${i}">${k >= 0 ? `<b>${k + 1}</b>` : ''}<span>${i}번${nm ? ' ' + esc(nm) : ''}</span></button>`;
   }
-  p.innerHTML = `<div class="row" style="gap:6px;margin-bottom:8px"><span class="muted" style="font-size:14px">빠른 선택</span>${os.map((o, i) => `<button type="button" class="btn ghost sm" data-lupre="${i}">${esc(o.name)} 타순</button>`).join('')}<button type="button" class="btn ghost sm" id="luClear">모두 해제</button></div>
+  p.innerHTML = `<div class="row" style="gap:6px;margin-bottom:8px"><span class="muted" style="font-size:14px">빠른 선택</span>${os.map((o, i) => `<button type="button" class="btn ghost sm" data-lupre="${i}">${esc(o.name)} 타순 <small class="muted">(${o.list.length}명)</small></button>`).join('')}<button type="button" class="btn ghost sm" id="luClear">모두 해제</button></div>
+    ${os.length < 2 ? `<div class="muted" style="font-size:14px;margin-bottom:6px">💡 ⚙️ 설정 → 연습 모드 타순에 여자/남자 경기 타순을 적고 저장하면 여기에 버튼이 생겨요.</div>` : ''}
     <div class="muted" style="font-size:14px;margin-bottom:6px">누르는 순서대로 타순 번호가 붙어요. 다시 누르면 빠져요.</div>
     <div class="lugrid">${boxes}</div>
     <div class="row" style="margin-top:10px;justify-content:space-between">
@@ -936,7 +937,7 @@ function renderRecs(){
   const list = Object.entries(recsOf(n)).sort((a, b) => sp && (vc[b[0]] || 0) !== (vc[a[0]] || 0) ? (vc[b[0]] || 0) - (vc[a[0]] || 0) : (a[1].at || 0) - (b[1].at || 0));
   const top = sp ? Math.max(0, ...Object.values(vc)) : 0, canVote = sp && S.role === 'student' && !S.room.meta.locked;
   // 학생 응원가의 추천은 그 번호 학생만 골라 쓸 수 있어요 (팀 응원가·라인업송은 선생님)
-  const canUse = sp ? canEditN(n) : (S.role === 'student' && S.me === n && !S.room.meta.locked);
+  const canUse = sp ? canEditN(n) : (S.role === 'teacher' || (S.role === 'student' && S.me === n && !S.room.meta.locked));
   $('#mRecs').innerHTML = (sp && list.length ? `<div class="votehint">🗳 마음에 드는 추천에 <b>한 표</b>를 줘요. 다시 누르면 취소, 다른 걸 누르면 바뀌어요. (내 추천에는 투표할 수 없어요)</div>` : '') + (list.length ? list.map(([id, r]) => {
     const v = vc[id] || 0, mine = myVote === id, own = S.me && r.from === S.me;
     const voteHTML = sp ? `<span class="vbox ${top && v === top ? 'top' : ''}">${top && v === top ? '🏆 ' : ''}👍 ${v}표</span>${canVote && !own ? `<button class="vbtn ${mine ? 'on' : ''}" data-vote="${id}">${mine ? '✔ 내 투표' : '투표하기'}</button>` : ''}` : '';
@@ -1012,8 +1013,10 @@ async function sendRec(){
 let G = { mode: 'single', key: null, idx: 0, lines: [], li: 0, kara: true };
 function getOrders(raw){
   const m = S.room.meta, ok = v => v >= 1 && v <= m.count;
-  const os = (Array.isArray(m.orders) && m.orders.length ? m.orders : [{ name: '전체 경기', list: m.order || [], all: true }])
-    .map(o => ({ name: o.name || '경기', list: (o.list || []).filter(ok), all: !!o.all }));
+  const arr = x => Array.isArray(x) ? x : (x && typeof x === 'object' ? Object.keys(x).sort((a, b) => a - b).map(k => x[k]) : []);
+  const raw0 = arr(m.orders).filter(Boolean);
+  const os = (raw0.length ? raw0 : [{ name: '전체 경기', list: m.order || [], all: true }])
+    .map(o => ({ name: o.name || '경기', list: arr(o.list).map(Number).filter(ok), all: !!o.all }));
   if (raw) return os;
   return os.map(o => {
     if (!o.all) return o;

@@ -184,6 +184,9 @@ footer{text-align:center;color:rgba(255,255,255,.7);font-size:13px;margin-top:30
 .lubox.on{border-color:var(--ink);background:#fff3c4}
 .lubox b{background:var(--ink);color:var(--gold);border-radius:99px;min-width:24px;height:24px;display:inline-grid;place-items:center;font-size:13px}
 .lubox span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lutpl{margin-top:10px;background:#fff7d6;border:2px solid #f0d77a;border-radius:10px;padding:10px 12px;font-weight:700;font-size:15px}
+.lutpl label{display:flex;align-items:center;gap:6px;margin-top:6px;font-weight:600}
+.lutpl input{width:18px;height:18px}
 
 /* 승인 · 감사 */
 .apbox{background:#eef8f1;border:2px solid #bfe3cb;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:10px}
@@ -854,7 +857,7 @@ function buildModal(){
     $('#mUrl').addEventListener('change', () => { const st = ytStart($('#mUrl').value); if (st && !$('#mStart').value) $('#mStart').value = st; });
     $('#mInfoBtn').onclick = saveInfo;
     const ta = $('#mLyr');
-    ta.oninput = () => { M.dirtyLyr = true; $('#mLyrSaved').textContent = ''; updateCount(); renderRules(); };
+    ta.oninput = () => { M.dirtyLyr = true; $('#mLyrSaved').textContent = ''; updateCount(); renderRules(); if ($('#mLuPanel') && !$('#mLuPanel').hidden){ LUM = ''; luRender(); } };
     $('#mLyrBtn').onclick = saveLyrics;
     if ($('#mLuBtn')) $('#mLuBtn').onclick = () => { const p = $('#mLuPanel'); p.hidden = !p.hidden; if (!p.hidden) luRender(); };
     $('#mBody').querySelectorAll('.sec:nth-child(2) .tchip').forEach(b => b.onclick = () => insertAt(ta, fill(b.dataset.t, n)));
@@ -878,7 +881,19 @@ function buildModal(){
 }
 
 /* 라인업 고르기 */
-let LU = [], LUF = 'a';
+let LU = [], LUF = 'a', LUM = '';
+// 라인업송 가사 빈칸: OO / ○○ / ㅇㅇ / ___ → 이름, □ → 타순 번호
+const NAME_SLOT = /(?<![A-Za-z])OO(?![A-Za-z])|○○|ㅇㅇ|_{2,}/g, ORD_SLOT = /□/g;
+const slotCount = t => (String(t).match(NAME_SLOT) || []).length;
+function luFillTemplate(tpl, list, mode){
+  const nm = v => playerName(v) || v + '번';
+  if (mode === 'seq'){
+    let i = 0, j = 0;
+    return tpl.replace(NAME_SLOT, m => i < list.length ? nm(list[i++]) : m).replace(ORD_SLOT, m => (++j) + '');
+  }
+  const multi = tpl.trim().includes('\n');
+  return list.map((v, k) => tpl.trim().replace(NAME_SLOT, nm(v)).replace(ORD_SLOT, (k + 1) + '')).join(multi ? '\n\n' : '\n');
+}
 function luRender(){
   const p = $('#mLuPanel'); if (!p) return;
   const m = S.room.meta, os = getOrders();
@@ -891,16 +906,32 @@ function luRender(){
     ${os.length < 2 ? `<div class="muted" style="font-size:14px;margin-bottom:6px">💡 ⚙️ 설정 → 연습 모드 타순에 여자/남자 경기 타순을 적고 저장하면 여기에 버튼이 생겨요.</div>` : ''}
     <div class="muted" style="font-size:14px;margin-bottom:6px">누르는 순서대로 타순 번호가 붙어요. 다시 누르면 빠져요.</div>
     <div class="lugrid">${boxes}</div>
+    ${(() => {
+      const k = slotCount($('#mLyr') ? $('#mLyr').value : '');
+      if (!k) return `<div class="muted" style="font-size:14px;margin-top:8px">💡 가사에 <b>OO</b>(또는 ○○, ___)를 빈칸으로 적어 두면 고른 친구 이름이 그 자리에 채워져요. <b>□</b>는 타순 번호로 채워져요.</div>`;
+      const def = k >= LU.length ? 'seq' : 'rep'; if (!LUM) LUM = def;
+      return `<div class="lutpl" id="luMode">✏️ 가사에 빈칸 <b>${k}개</b>가 있어요. 고른 친구 이름으로 채울게요.
+        <label><input type="radio" name="lum" value="seq" ${LUM === 'seq' ? 'checked' : ''}> 빈칸에 차례로 채우기 ${LU.length > k ? `<small class="muted">(${LU.length - k}명은 자리가 모자라요)</small>` : ''}</label>
+        <label><input type="radio" name="lum" value="rep" ${LUM === 'rep' ? 'checked' : ''}> 가사 틀을 한 명씩 반복하기 <small class="muted">(${LU.length}번 반복)</small></label></div>`;
+    })()}
     <div class="row" style="margin-top:10px;justify-content:space-between">
-      <span class="row"><span class="muted" style="font-size:14px">넣는 모양</span><select id="luFmt" class="inp" style="width:auto;padding:6px 10px">
+      <span class="row" id="luFmtWrap" ${slotCount($('#mLyr') ? $('#mLyr').value : '') ? 'hidden' : ''}><span class="muted" style="font-size:14px">넣는 모양</span><select id="luFmt" class="inp" style="width:auto;padding:6px 10px">
         <option value="a">1번 타자 민수!</option><option value="b">민수!</option><option value="c">7번 민수!</option></select></span>
       <span class="row"><span class="muted" style="font-size:14px">${LU.length}명 골랐어요</span><button type="button" class="btn gold sm" id="luIns" ${LU.length ? '' : 'disabled'}>가사에 넣기</button></span>
     </div>`;
   $('#luFmt').value = LUF; $('#luFmt').onchange = e => LUF = e.target.value;
-  p.querySelectorAll('[data-lu]').forEach(b => b.onclick = () => { const v = +b.dataset.lu, k = LU.indexOf(v); if (k >= 0) LU.splice(k, 1); else LU.push(v); luRender(); });
+  if ($('#luMode')) $('#luMode').querySelectorAll('input').forEach(r => r.onchange = () => { LUM = r.value; });
+  p.querySelectorAll('[data-lu]').forEach(b => b.onclick = () => { const v = +b.dataset.lu, k = LU.indexOf(v); if (k >= 0) LU.splice(k, 1); else LU.push(v); LUM = ''; luRender(); });
   p.querySelectorAll('[data-lupre]').forEach(b => b.onclick = () => { const o = getOrders()[+b.dataset.lupre]; if (o){ LU = o.list.slice(); luRender(); } });
   $('#luClear').onclick = () => { LU = []; luRender(); };
   $('#luIns').onclick = () => {
+    const ta = $('#mLyr'), k = slotCount(ta.value);
+    if (k){
+      const mode = LUM || (k >= LU.length ? 'seq' : 'rep');
+      ta.value = luFillTemplate(ta.value, LU, mode); ta.dispatchEvent(new Event('input'));
+      p.hidden = true; LUM = '';
+      return toast(`빈칸에 ${mode === 'seq' ? Math.min(k, LU.length) : LU.length}명 이름을 채웠어요. "가사 저장"을 눌러 주세요!`);
+    }
     const lines = LU.map((v, i) => { const nm = playerName(v) || v + '번'; return LUF === 'b' ? `${nm}!` : LUF === 'c' ? `${v}번 ${playerName(v) || ''}`.trim() + '!' : `${i + 1}번 타자 ${nm}!`; });
     insertAt($('#mLyr'), lines.join('\n')); p.hidden = true; toast(`${LU.length}명을 가사에 넣었어요. "가사 저장"을 눌러 주세요!`);
   };

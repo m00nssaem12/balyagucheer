@@ -880,7 +880,11 @@ function buildModal(){
       <div id="mRecs"></div>
       ${canRec ? `
         <div class="chips">${chipsHTML(n)}</div>
-        <input id="mRecUrl" class="inp" style="margin-bottom:6px" placeholder="🎵 추천 노래 유튜브 링크 (선택)">
+        <div class="row" style="margin-bottom:6px">
+          <input id="mRecUrl" class="inp" style="flex:3;min-width:180px" placeholder="🎵 추천 노래 유튜브 링크 (선택)">
+          <input id="mRecStart" class="inp" type="number" min="0" style="flex:1;min-width:80px" placeholder="시작(초)">
+          <input id="mRecEnd" class="inp" type="number" min="0" style="flex:1;min-width:80px" placeholder="끝(초)">
+        </div>
         <input id="mRecSong" class="inp" style="margin-bottom:6px" maxlength="40" placeholder="원곡 제목 (선택)">
         <textarea id="mRecIn" class="inp" style="min-height:80px" maxlength="200" placeholder="추천 가사 (여러 줄 가능, 200자까지)"></textarea>
         <div class="row" style="justify-content:flex-end;margin-top:6px"><button class="btn" id="mRecBtn">추천하기</button></div>` : ''}
@@ -900,6 +904,7 @@ function buildModal(){
   }
   if (canRec){
     const ri = $('#mRecIn');
+    $('#mRecUrl').addEventListener('change', () => { const st = ytStart($('#mRecUrl').value); if (st && !$('#mRecStart').value) $('#mRecStart').value = st; });
     $('#mBody').querySelectorAll('.sec:nth-child(3) .tchip').forEach(b => b.onclick = () => { ri.value = (ri.value ? ri.value.replace(/\s*$/, ' ') : '') + fill(b.dataset.t, n); ri.focus(); });
     $('#mRecBtn').onclick = sendRec;
   }
@@ -994,7 +999,7 @@ function updateModal(){
     if ($('#mAp')) $('#mAp').innerHTML = s.approved ? '✅ 선생님이 승인했어요' : '⏳ 선생님 승인을 기다리는 중이에요 (고치면 다시 승인받아요)';
     if ($('#mApBtn')) $('#mApBtn').textContent = s.approved ? '승인 취소' : '✅ 승인하기';
   } else {
-    $('#mInfoView').innerHTML = (isSp(n) ? '' : `<div><span>선수</span>${esc(nm) || '-'}</div>`) + `<div><span>원곡</span>${esc(s.title) || '-'}</div>`;
+    $('#mInfoView').innerHTML = (isSp(n) ? '' : `<div><span>선수</span>${esc(nm) || '-'}</div>`) + `<div><span>원곡</span>${esc(s.title) || '-'}</div>` + (s.start || s.end ? `<div><span>구간</span>${s.start || 0}초${s.end ? ' ~ ' + s.end + '초' : '부터'}</div>` : '');
     if ($('#mAp')) $('#mAp').innerHTML = s.approved ? '✅ 선생님이 승인했어요' : '⏳ 선생님 승인 전이에요';
     const v = $('#mLyrView'); v.textContent = s.lyrics || '아직 가사가 없어요.'; v.classList.toggle('empty', !s.lyrics);
   }
@@ -1013,7 +1018,7 @@ function renderRecs(){
     const voteHTML = sp ? `<span class="vbox ${top && v === top ? 'top' : ''}">${top && v === top ? '🏆 ' : ''}👍 ${v}표</span>${canVote && !own ? `<button class="vbtn ${mine ? 'on' : ''}" data-vote="${id}">${mine ? '✔ 내 투표' : '투표하기'}</button>` : ''}` : '';
     const canDel = S.role === 'teacher' || S.me === n || (S.me && r.from === S.me);
     const rid = ytId(r.url);
-    return `<div class="rec ${sp && top && v === top ? 'win' : ''}">${voteHTML ? `<div class="vrow">${voteHTML}</div>` : ''}${rid ? `<div class="rsong">🎵 ${esc(r.title || '추천 노래')} <button class="prevbtn" data-prev="${id}">${M.prevId === id ? '■ 멈추기' : '▶ 들어보기'}</button> <a href="https://www.youtube.com/watch?v=${rid}${r.start ? '&t=' + r.start + 's' : ''}" target="_blank" rel="noopener" class="ytlink">유튜브에서 열기</a></div>` : (r.title ? `<div class="rsong">🎵 ${esc(r.title)}</div>` : '')}
+    return `<div class="rec ${sp && top && v === top ? 'win' : ''}">${voteHTML ? `<div class="vrow">${voteHTML}</div>` : ''}${rid ? `<div class="rsong">🎵 ${esc(r.title || '추천 노래')} ${r.start || r.end ? `<small class="muted">(${r.start || 0}초${r.end ? '~' + r.end + '초' : '부터'})</small> ` : ''}<button class="prevbtn" data-prev="${id}">${M.prevId === id ? '■ 멈추기' : '▶ 들어보기'}</button> <a href="https://www.youtube.com/watch?v=${rid}${r.start ? '&t=' + r.start + 's' : ''}" target="_blank" rel="noopener" class="ytlink">유튜브에서 열기</a></div>` : (r.title ? `<div class="rsong">🎵 ${esc(r.title)}</div>` : '')}
       ${r.text ? `<div class="rtext">${esc(r.text)}</div>` : ''}${r.used ? `<div class="thanks">❤️ 고마워! 응원가에 쓰였어요</div>` : ''}<div class="rmeta">${r.from === 'T' ? '👩‍🏫 선생님' : r.from + '번 친구'}의 추천
       ${canUse && rid ? `<button data-song="${id}">이 노래로 바꾸기</button>` : ''}${canUse && r.text ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
   }).join('') : '<p class="muted" style="margin:0 0 8px">아직 추천이 없어요.</p>');
@@ -1024,7 +1029,7 @@ function renderRecs(){
     $('#mRecs').querySelectorAll('[data-prev]').forEach(x => x.textContent = x.dataset.prev === M.prevId ? '■ 멈추기' : '▶ 들어보기');
     if (on){
       $('#mFrame').innerHTML = ''; M.frameKey = '';
-      box.innerHTML = `<div class="prevhead">▶ ${r.from === 'T' ? '선생님' : r.from + '번 친구'}의 추천 노래${r.title ? ' · ' + esc(r.title) : ''}</div><div class="frame">${ytEmbed(ytId(r.url), r.start || ytStart(r.url), true)}</div>`;
+      box.innerHTML = `<div class="prevhead">▶ ${r.from === 'T' ? '선생님' : r.from + '번 친구'}의 추천 노래${r.title ? ' · ' + esc(r.title) : ''}</div><div class="frame">${ytEmbed(ytId(r.url), r.start || ytStart(r.url), true, r.end)}</div>`;
       box.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     } else box.innerHTML = '';
   });
@@ -1041,7 +1046,7 @@ function renderRecs(){
   });
   $('#mRecs').querySelectorAll('[data-song]').forEach(b => b.onclick = () => {
     const r = recsOf(n)[b.dataset.song]; if (!r || !$('#mUrl')) return;
-    $('#mUrl').value = r.url; $('#mStart').value = r.start || ytStart(r.url) || '';
+    $('#mUrl').value = r.url; $('#mStart').value = r.start || ytStart(r.url) || ''; $('#mEnd').value = r.end || '';
     if (r.title) $('#mSong').value = r.title;
     M.dirtyInfo = true; saveInfo().then(() => { toast('추천받은 노래로 바꿨어요!'); Store.update(S.code, ['recs', keyOf(n), b.dataset.song], { used: true }); });
   });
@@ -1087,13 +1092,15 @@ async function sendRec(){
   if (!text && !url) return toast('추천 가사나 노래 링크를 넣어 주세요', true);
   if (url && !ytId(url)) return toast('유튜브 링크가 아니에요. 주소를 다시 확인해 주세요', true);
   if (text.length > 200) return toast('추천 가사는 200자까지 쓸 수 있어요', true);
+  const rStart = Math.max(0, parseInt($('#mRecStart').value, 10) || ytStart(url) || 0), rEnd = Math.max(0, parseInt($('#mRecEnd').value, 10) || 0);
+  if (rEnd && rEnd <= rStart) return toast('끝(초)은 시작(초)보다 커야 해요', true);
   for (const t of [text, title]){ const b = checkText(t); if (b) return toast(badMsg(b), true); }
   const mine = S.role === 'teacher' ? 0 : Object.values(recsOf(n)).filter(r => r.from === S.me).length;
   if (mine >= 3) return toast('한 친구에게는 3개까지 추천할 수 있어요. 지우고 다시 써 보세요', true);
   const rec = { from: S.role === 'teacher' ? 'T' : S.me, text, at: Date.now() };
-  if (url){ rec.url = url; rec.start = ytStart(url) || 0; }
+  if (url){ rec.url = url; rec.start = rStart; if (rEnd) rec.end = rEnd; }
   if (title) rec.title = title.slice(0, 40);
-  try { await Store.push(S.code, ['recs', keyOf(n)], rec); ri.value = ''; $('#mRecUrl').value = ''; $('#mRecSong').value = ''; toast('추천했어요! 👍'); }
+  try { await Store.push(S.code, ['recs', keyOf(n)], rec); ri.value = ''; $('#mRecUrl').value = ''; $('#mRecSong').value = ''; $('#mRecStart').value = ''; $('#mRecEnd').value = ''; toast('추천했어요! 👍'); }
   catch(e){ toast('추천하지 못했어요', true); }
 }
 

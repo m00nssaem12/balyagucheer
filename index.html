@@ -588,7 +588,7 @@ function ytStart(u){
   const h = +(v.match(/(\d+)h/) || [0,0])[1], mi = +(v.match(/(\d+)m/) || [0,0])[1], s = +(v.match(/(\d+)s/) || [0,0])[1];
   return h * 3600 + mi * 60 + s;
 }
-const ytEmbed = (id, st, auto, end) => `<iframe src="https://www.youtube-nocookie.com/embed/${id}?start=${st || 0}${end > (st || 0) ? '&end=' + end : ''}&rel=0&playsinline=1${auto ? '&autoplay=1' : ''}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+const ytEmbed = (id, st, auto, end) => `<iframe src="https://www.youtube.com/embed/${id}?start=${st || 0}${end > (st || 0) ? '&end=' + end : ''}&rel=0&playsinline=1${auto ? '&autoplay=1' : ''}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
 
 /* ---------------- 상태 ---------------- */
 const S = { code: null, role: null, me: null, room: null, unwatch: null, openN: null };

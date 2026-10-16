@@ -988,7 +988,7 @@ function updateModal(){
   const s = song(n), nm = playerName(n);
   $('#mTitle').textContent = isSp(n) ? spInfo(n).label : (nm ? nm + ' ' : '') + '응원가';
   const id = ytId(s.url), key = id ? id + '@' + (s.start || 0) + '-' + (s.end || 0) : '';
-  if (key !== M.frameKey || !$('#mFrame').innerHTML){
+  if (!(M.dirtyInfo && M.frameKey === 'preview') && (key !== M.frameKey || !$('#mFrame').innerHTML)){
     M.frameKey = key;
     $('#mFrame').innerHTML = id ? ytEmbed(id, s.start, false, s.end) : `<div class="noframe">🎵<br>${M.built ? '아래에 유튜브 링크를 넣어 주세요' : '아직 노래가 없어요'}</div>`;
   }
@@ -1020,7 +1020,7 @@ function renderRecs(){
     const rid = ytId(r.url);
     return `<div class="rec ${sp && top && v === top ? 'win' : ''}">${voteHTML ? `<div class="vrow">${voteHTML}</div>` : ''}${rid ? `<div class="rsong">🎵 ${esc(r.title || '추천 노래')} ${r.start || r.end ? `<small class="muted">(${r.start || 0}초${r.end ? '~' + r.end + '초' : '부터'})</small> ` : ''}<button class="prevbtn" data-prev="${id}">${M.prevId === id ? '■ 멈추기' : '▶ 들어보기'}</button> <a href="https://www.youtube.com/watch?v=${rid}${r.start ? '&t=' + r.start + 's' : ''}" target="_blank" rel="noopener" class="ytlink">유튜브에서 열기</a></div>` : (r.title ? `<div class="rsong">🎵 ${esc(r.title)}</div>` : '')}
       ${r.text ? `<div class="rtext">${esc(r.text)}</div>` : ''}${r.used ? `<div class="thanks">❤️ 고마워! 응원가에 쓰였어요</div>` : ''}<div class="rmeta">${r.from === 'T' ? '👩‍🏫 선생님' : r.from + '번 친구'}의 추천
-      ${canUse && rid ? `<button data-song="${id}">이 노래로 바꾸기</button>` : ''}${canUse && r.text ? `<button data-use="${id}">가사에 넣기</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
+      ${canUse && rid ? `<button data-song="${id}">이 노래로 바꾸기</button>` : ''}${canUse && r.text ? `<button data-use="${id}">${rid ? '가사+노래 넣기' : '가사에 넣기'}</button>` : ''}${canDel ? `<button class="ghost" data-del="${id}">지우기</button>` : ''}</div></div>`;
   }).join('') : '<p class="muted" style="margin:0 0 8px">아직 추천이 없어요.</p>');
   $('#mRecs').querySelectorAll('[data-prev]').forEach(b => b.onclick = () => {
     const id = b.dataset.prev, r = recsOf(n)[id], box = $('#mPrev'); if (!r || !box) return;
@@ -1041,7 +1041,14 @@ function renderRecs(){
   $('#mRecs').querySelectorAll('[data-use]').forEach(b => b.onclick = () => {
     const r = recsOf(n)[b.dataset.use]; const ta = $('#mLyr'); if (!r || !ta) return;
     ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, '') + '\n' + r.text : r.text;
-    ta.dispatchEvent(new Event('input')); toast('가사에 넣었어요. "가사 저장"을 눌러 주세요!');
+    ta.dispatchEvent(new Event('input'));
+    if (ytId(r.url) && $('#mUrl')){
+      $('#mUrl').value = r.url; $('#mStart').value = r.start || ytStart(r.url) || ''; $('#mEnd').value = r.end || '';
+      if (r.title) $('#mSong').value = r.title;
+      M.dirtyInfo = true; if ($('#mInfoSaved')) $('#mInfoSaved').textContent = '';
+      const id = ytId(r.url); $('#mFrame').innerHTML = ytEmbed(id, r.start || ytStart(r.url), false, r.end); M.frameKey = 'preview';
+      toast('가사와 유튜브 링크를 넣었어요. "가사 저장"을 누르면 함께 저장돼요!');
+    } else toast('가사에 넣었어요. "가사 저장"을 눌러 주세요!');
     Store.update(S.code, ['recs', keyOf(n), b.dataset.use], { used: true });
   });
   $('#mRecs').querySelectorAll('[data-song]').forEach(b => b.onclick = () => {
